@@ -1,0 +1,279 @@
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Eye, EyeOff, User, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
+import { FormData } from '../types/form'
+import { dbOperations } from '../lib/supabase'
+
+interface AuthFormProps {
+  pendingFormData?: FormData
+  onAuthSuccess: (referenceId?: string) => void
+}
+
+interface AuthFormData {
+  email: string
+  password: string
+  fullName?: string
+}
+
+export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  const { signUp, signIn } = useAuth()
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<AuthFormData>()
+
+  const onSubmit = async (data: AuthFormData) => {
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      if (isSignUp) {
+        if (!data.fullName) {
+          setError('Full name is required for sign up')
+          return
+        }
+        await signUp(data.email, data.password, data.fullName)
+      } else {
+        const result = await signIn(data.email, data.password)
+        
+        // If we have pending form data and user just signed in, save it
+        if (pendingFormData && result.user) {
+          const referenceId = await dbOperations.createSubmission({
+            user_id: result.user.id,
+            personal_info: {
+              fullName: pendingFormData.fullName,
+              email: pendingFormData.email,
+              countryOfCitizenship: pendingFormData.countryOfCitizenship,
+              countryOfResidence: pendingFormData.countryOfResidence,
+              ageGroup: pendingFormData.ageGroup,
+              maritalStatus: pendingFormData.maritalStatus,
+              hasChildren: pendingFormData.hasChildren,
+              childrenAges: pendingFormData.childrenAges
+            },
+            education_info: {
+              highestEducation: pendingFormData.highestEducation,
+              educationOutsideCanada: pendingFormData.educationOutsideCanada
+            },
+            work_experience: {
+              yearsOfExperience: pendingFormData.yearsOfExperience,
+              workInRegulatedProfession: pendingFormData.workInRegulatedProfession,
+              occupation: pendingFormData.occupation
+            },
+            language_skills: {
+              speakEnglishOrFrench: pendingFormData.speakEnglishOrFrench,
+              languageTest: pendingFormData.languageTest,
+              testScores: pendingFormData.testScores
+            },
+            canadian_connections: {
+              interestedInImmigrating: pendingFormData.interestedInImmigrating,
+              studiedOrWorkedInCanada: pendingFormData.studiedOrWorkedInCanada,
+              jobOfferFromCanadianEmployer: pendingFormData.jobOfferFromCanadianEmployer,
+              relativesInCanada: pendingFormData.relativesInCanada,
+              settlementFunds: pendingFormData.settlementFunds
+            },
+            additional_info: {
+              businessOrManagerialExperience: pendingFormData.businessOrManagerialExperience,
+              additionalInfo: pendingFormData.additionalInfo
+            },
+            submission_status: 'submitted'
+          })
+          
+          onAuthSuccess(referenceId || undefined)
+        } else {
+          onAuthSuccess()
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during authentication')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp)
+    setError(null)
+    reset()
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="text-center mb-8">
+            <div className="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <User className="h-6 w-6 text-red-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900">
+              {isSignUp ? 'Create Account' : 'Sign In'}
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              {isSignUp 
+                ? 'Create an account to save your assessment' 
+                : pendingFormData 
+                  ? 'Sign in to complete your assessment submission'
+                  : 'Sign in to access your immigration assessments'
+              }
+            </p>
+          </div>
+
+          {pendingFormData && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="flex items-center">
+                <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
+                <p className="text-sm text-blue-800">
+                  Your assessment form is ready to submit. Please sign in or create an account to continue.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {isSignUp && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    {...register('fullName', { 
+                      required: isSignUp ? 'Full name is required' : false 
+                    })}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                {errors.fullName && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-1" />
+                    {errors.fullName.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  {...register('email', { 
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Invalid email address'
+                    }
+                  })}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Enter your email"
+                  defaultValue={pendingFormData?.email || ''}
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('password', { 
+                    required: 'Password is required',
+                    minLength: {
+                      value: 6,
+                      message: 'Password must be at least 6 characters'
+                    }
+                  })}
+                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-2" />
+                  {error}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-red-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  {isSignUp ? 'Creating Account...' : 'Signing In...'}
+                </div>
+              ) : (
+                isSignUp ? 'Create Account' : 'Sign In'
+              )}
+            </button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={toggleMode}
+                className="text-sm text-red-600 hover:text-red-500 font-medium"
+              >
+                {isSignUp 
+                  ? 'Already have an account? Sign in' 
+                  : "Don't have an account? Sign up"
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
