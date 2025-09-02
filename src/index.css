@@ -8,7 +8,7 @@
   }
   
   body {
-    @apply @reference utilities.bg-gray-50 @reference utilities.text-gray-900;
+    @apply bg-gray-50 text-gray-900;
   }
 }
 
