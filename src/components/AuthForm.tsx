@@ -140,7 +140,7 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {isSignUp && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="form-label">
                   Full Name *
                 </label>
                 <div className="relative">
@@ -152,12 +152,12 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
                     {...register('fullName', { 
                       required: isSignUp ? 'Full name is required' : false 
                     })}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="form-input pl-10"
                     placeholder="Enter your full name"
                   />
                 </div>
                 {errors.fullName && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.fullName.message}
                   </p>
@@ -166,7 +166,7 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="form-label">
                 Email Address *
               </label>
               <div className="relative">
@@ -182,13 +182,13 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
                       message: 'Invalid email address'
                     }
                   })}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="form-input pl-10"
                   placeholder="Enter your email"
                   defaultValue={pendingFormData?.email || ''}
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.email.message}
                 </p>
@@ -196,7 +196,7 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="form-label">
                 Password *
               </label>
               <div className="relative">
@@ -212,7 +212,7 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
                       message: 'Password must be at least 6 characters'
                     }
                   })}
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="form-input pl-10 pr-10"
                   placeholder="Enter your password"
                 />
                 <button
@@ -228,7 +228,7 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.password.message}
                 </p>
@@ -247,7 +247,7 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-red-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-full btn-primary"
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center">

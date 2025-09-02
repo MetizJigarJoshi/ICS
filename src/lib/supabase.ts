@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { UserProfile, EligibilitySubmission } from '../types/form'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -8,30 +9,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Database types
-export interface UserProfile {
-  id: string
-  email: string
-  full_name?: string
-  created_at: string
-  updated_at: string
-}
-
-export interface EligibilitySubmission {
-  id: string
-  user_id: string
-  reference_id: string
-  personal_info: Record<string, any>
-  education_info: Record<string, any>
-  work_experience: Record<string, any>
-  language_skills: Record<string, any>
-  canadian_connections: Record<string, any>
-  additional_info: Record<string, any>
-  submission_status: string
-  created_at: string
-  updated_at: string
-}
 
 // Helper functions for database operations
 export const dbOperations = {

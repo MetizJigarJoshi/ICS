@@ -113,7 +113,7 @@ export function SuccessMessage({ referenceId, onStartNew }: SuccessMessageProps)
             <div className="text-center pt-4">
               <button
                 onClick={onStartNew}
-                className="bg-red-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+                className="btn-primary"
               >
                 Submit Another Assessment
               </button>

@@ -117,17 +117,15 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Name *
-                </label>
+                <label className="form-label">Your Name *</label>
                 <input
                   type="text"
                   {...register('fullName', { required: 'Name is required' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="form-input"
                   placeholder="Enter your full name"
                 />
                 {errors.fullName && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.fullName.message}
                   </p>
@@ -135,9 +133,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  What is your email address? *
-                </label>
+                <label className="form-label">What is your email address? *</label>
                 <input
                   type="email"
                   {...register('email', { 
@@ -147,11 +143,11 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                       message: 'Invalid email address'
                     }
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="form-input"
                   placeholder="your.email@example.com"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.email.message}
                   </p>
@@ -159,12 +155,10 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country of citizenship *
-                </label>
+                <label className="form-label">Country of citizenship *</label>
                 <select
                   {...register('countryOfCitizenship', { required: 'Country of citizenship is required' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="form-input"
                 >
                   <option value="">Select country</option>
                   <option value="United States">United States</option>
@@ -178,7 +172,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <option value="Other">Other</option>
                 </select>
                 {errors.countryOfCitizenship && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.countryOfCitizenship.message}
                   </p>
@@ -186,12 +180,10 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country of Residence *
-                </label>
+                <label className="form-label">Country of Residence *</label>
                 <select
                   {...register('countryOfResidence', { required: 'Country of residence is required' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="form-input"
                 >
                   <option value="">Select country</option>
                   <option value="United States">United States</option>
@@ -205,7 +197,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <option value="Other">Other</option>
                 </select>
                 {errors.countryOfResidence && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />
                     {errors.countryOfResidence.message}
                   </p>
@@ -214,9 +206,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Age Group *
-              </label>
+              <label className="form-label">Age Group *</label>
               <div className="space-y-2">
                 {['Under 18', '18-29', '30-35', '36-40', '41-45', '46-55', 'Over 55'].map((age) => (
                   <label key={age} className="flex items-center">
@@ -231,7 +221,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 ))}
               </div>
               {errors.ageGroup && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.ageGroup.message}
                 </p>
@@ -239,9 +229,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Marital Status *
-              </label>
+              <label className="form-label">Marital Status *</label>
               <div className="space-y-2">
                 {['Single', 'Married', 'Common-law', 'Separated', 'Divorced', 'Widowed'].map((status) => (
                   <label key={status} className="flex items-center">
@@ -256,7 +244,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 ))}
               </div>
               {errors.maritalStatus && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.maritalStatus.message}
                 </p>
@@ -264,9 +252,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Do you have children? *
-              </label>
+              <label className="form-label">Do you have children? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -288,7 +274,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.hasChildren && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.hasChildren.message}
                 </p>
@@ -297,12 +283,10 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
 
             {watch('hasChildren') === 'yes' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  If yes, how many and what ages?
-                </label>
+                <label className="form-label">If yes, how many and what ages?</label>
                 <textarea
                   {...register('childrenAges')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="form-input"
                   rows={3}
                   placeholder="e.g., 2 children - ages 8 and 12"
                 />
@@ -318,9 +302,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                What is your highest education level? *
-              </label>
+              <label className="form-label">What is your highest education level? *</label>
               <div className="space-y-2">
                 {[
                   'High School',
@@ -343,7 +325,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 ))}
               </div>
               {errors.highestEducation && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.highestEducation.message}
                 </p>
@@ -351,9 +333,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Was your education completed outside of Canada? *
-              </label>
+              <label className="form-label">Was your education completed outside of Canada? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -375,7 +355,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.educationOutsideCanada && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.educationOutsideCanada.message}
                 </p>
@@ -391,9 +371,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                How many years of full time, skilled work experience do you have? *
-              </label>
+              <label className="form-label">How many years of full time, skilled work experience do you have? *</label>
               <div className="space-y-2">
                 {[
                   'Less than 1 year',
@@ -414,7 +392,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 ))}
               </div>
               {errors.yearsOfExperience && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.yearsOfExperience.message}
                 </p>
@@ -422,9 +400,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Is your work experience in a regulated profession? *
-              </label>
+              <label className="form-label">Is your work experience in a regulated profession? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -455,7 +431,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.workInRegulatedProfession && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.workInRegulatedProfession.message}
                 </p>
@@ -463,17 +439,15 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                What is your occupation title? *
-              </label>
+              <label className="form-label">What is your occupation title? *</label>
               <input
                 type="text"
                 {...register('occupation', { required: 'Occupation is required' })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="form-input"
                 placeholder="e.g., Software Engineer, Teacher, Accountant"
               />
               {errors.occupation && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.occupation.message}
                 </p>
@@ -489,9 +463,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Do you speak English or French? *
-              </label>
+              <label className="form-label">Do you speak English or French? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -513,7 +485,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.speakEnglishOrFrench && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.speakEnglishOrFrench.message}
                 </p>
@@ -521,9 +493,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Have you taken an official language test (IELTS, CELPIP, TEF, etc.)? *
-              </label>
+              <label className="form-label">Have you taken an official language test (IELTS, CELPIP, TEF, etc.)? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -545,7 +515,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.languageTest && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.languageTest.message}
                 </p>
@@ -554,12 +524,10 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
 
             {watch('languageTest') === 'yes' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Please enter your test scores
-                </label>
+                <label className="form-label">Please enter your test scores</label>
                 <textarea
                   {...register('testScores')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="form-input"
                   rows={3}
                   placeholder="e.g., IELTS: L-8.0, R-7.5, W-7.0, S-8.5 or CELPIP: L-9, R-8, W-7, S-9"
                 />
@@ -575,9 +543,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Why are you interested in immigrating to Canada? *
-              </label>
+              <label className="form-label">Why are you interested in immigrating to Canada? *</label>
               <div className="space-y-2">
                 {[
                   'Permanent Residency (Express Entry or PNP)',
@@ -599,7 +565,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 ))}
               </div>
               {errors.interestedInImmigrating && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.interestedInImmigrating.message}
                 </p>
@@ -607,9 +573,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Have you or your spouse previously studied or worked in Canada? *
-              </label>
+              <label className="form-label">Have you or your spouse previously studied or worked in Canada? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -631,7 +595,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.studiedOrWorkedInCanada && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.studiedOrWorkedInCanada.message}
                 </p>
@@ -639,9 +603,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Do you currently have a job offer from a Canadian employer? *
-              </label>
+              <label className="form-label">Do you currently have a job offer from a Canadian employer? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -663,7 +625,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.jobOfferFromCanadianEmployer && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.jobOfferFromCanadianEmployer.message}
                 </p>
@@ -671,9 +633,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Do you have any relatives in Canada? *
-              </label>
+              <label className="form-label">Do you have any relatives in Canada? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -695,7 +655,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.relativesInCanada && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.relativesInCanada.message}
                 </p>
@@ -703,9 +663,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Do you have any settlement funds available? *
-              </label>
+              <label className="form-label">Do you have any settlement funds available? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -727,7 +685,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.settlementFunds && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.settlementFunds.message}
                 </p>
@@ -743,9 +701,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Do you or your spouse have a business or have managerial experience? *
-              </label>
+              <label className="form-label">Do you or your spouse have a business or have managerial experience? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -767,7 +723,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 </label>
               </div>
               {errors.businessOrManagerialExperience && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="form-error">
                   <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.businessOrManagerialExperience.message}
                 </p>
@@ -775,12 +731,10 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Additional information or special circumstances (optional)
-              </label>
+              <label className="form-label">Additional information or special circumstances (optional)</label>
               <textarea
                 {...register('additionalInfo')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="form-input"
                 rows={4}
                 placeholder="Please provide any additional information that might be relevant to your immigration assessment..."
               />
@@ -808,7 +762,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-red-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-full btn-primary"
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
