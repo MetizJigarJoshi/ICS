@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email text UNIQUE NOT NULL,
   full_name text,
+  password text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
