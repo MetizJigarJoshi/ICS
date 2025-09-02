@@ -169,6 +169,11 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <option value="Nigeria">Nigeria</option>
                   <option value="France">France</option>
                   <option value="Germany">Germany</option>
+                  <option value="Australia">Australia</option>
+                  <option value="Brazil">Brazil</option>
+                  <option value="Mexico">Mexico</option>
+                  <option value="South Korea">South Korea</option>
+                  <option value="Japan">Japan</option>
                   <option value="Other">Other</option>
                 </select>
                 {errors.countryOfCitizenship && (
@@ -194,6 +199,11 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <option value="Nigeria">Nigeria</option>
                   <option value="France">France</option>
                   <option value="Germany">Germany</option>
+                  <option value="Australia">Australia</option>
+                  <option value="Brazil">Brazil</option>
+                  <option value="Mexico">Mexico</option>
+                  <option value="South Korea">South Korea</option>
+                  <option value="Japan">Japan</option>
                   <option value="Other">Other</option>
                 </select>
                 {errors.countryOfResidence && (
@@ -493,6 +503,29 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
+              <label className="form-label">If you have would you take your level?</label>
+              <div className="space-y-2">
+                {[
+                  'Beginner',
+                  'Intermediate',
+                  'Advanced',
+                  'Fluent',
+                  'Native'
+                ].map((level) => (
+                  <label key={level} className="flex items-center">
+                    <input
+                      type="radio"
+                      value={level}
+                      {...register('languageLevel')}
+                      className="mr-2 text-red-600 focus:ring-red-500"
+                    />
+                    <span className="text-sm text-gray-700">{level}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
               <label className="form-label">Have you taken an official language test (IELTS, CELPIP, TEF, etc.)? *</label>
               <div className="space-y-2">
                 <label className="flex items-center">
@@ -524,6 +557,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
 
             {watch('languageTest') === 'yes' && (
               <div>
+                <label className="form-label">(Conditional: Show only if "Yes" above)</label>
                 <label className="form-label">Please enter your test scores</label>
                 <textarea
                   {...register('testScores')}
@@ -690,6 +724,16 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   {errors.settlementFunds.message}
                 </p>
               )}
+            </div>
+
+            <div>
+              <label className="form-label">If Yes) How much?</label>
+              <input
+                type="text"
+                {...register('settlementFundsAmount')}
+                className="form-input"
+                placeholder="Enter amount in CAD"
+              />
             </div>
           </section>
 

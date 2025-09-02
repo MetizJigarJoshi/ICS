@@ -21,6 +21,7 @@ export interface FormData {
   // Language Skills
   speakEnglishOrFrench: 'yes' | 'no'
   languageTest: 'yes' | 'no'
+  languageLevel?: string
   testScores?: string
 
   // Canadian Connections
@@ -29,6 +30,7 @@ export interface FormData {
   jobOfferFromCanadianEmployer: 'yes' | 'no'
   relativesInCanada: 'yes' | 'no'
   settlementFunds: 'yes' | 'no'
+  settlementFundsAmount?: string
 
   // Additional Information
   businessOrManagerialExperience: 'yes' | 'no'
