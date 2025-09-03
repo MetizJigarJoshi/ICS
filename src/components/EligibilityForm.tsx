@@ -700,7 +700,7 @@ export function EligibilityForm({
               <label className="form-label">
                 Why are you interested in immigrating to Canada? *
               </label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[
                   "Permanent Residency (Express Entry or PNP)",
                   "Work Permit",
@@ -709,16 +709,16 @@ export function EligibilityForm({
                   "Refugee/Asylum",
                   "I'm not sure",
                 ].map((reason) => (
-                  <label key={reason} className="flex items-center">
+                  <label key={reason} className="flex items-start">
                     <input
-                      type="radio"
+                      type="checkbox"
                       value={reason}
                       {...register("interestedInImmigrating", {
-                        required: "Please select an option",
+                        required: "Please select at least one option",
                       })}
-                      className="mr-2 text-red-600 focus:ring-red-500"
+                      className="mr-3 mt-0.5 text-red-600 focus:ring-red-500 rounded"
                     />
-                    <span className="text-sm text-gray-700">{reason}</span>
+                    <span className="text-sm text-gray-700 leading-relaxed">{reason}</span>
                   </label>
                 ))}
               </div>

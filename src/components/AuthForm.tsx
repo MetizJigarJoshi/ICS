@@ -107,7 +107,9 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
               testScores: pendingFormData.testScores,
             },
             canadian_connections: {
-              interestedInImmigrating: pendingFormData.interestedInImmigrating,
+              interestedInImmigrating: Array.isArray(pendingFormData.interestedInImmigrating) 
+                ? pendingFormData.interestedInImmigrating 
+                : [pendingFormData.interestedInImmigrating],
               studiedOrWorkedInCanada: pendingFormData.studiedOrWorkedInCanada,
               jobOfferFromCanadianEmployer:
                 pendingFormData.jobOfferFromCanadianEmployer,

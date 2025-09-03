@@ -25,7 +25,7 @@ export interface FormData {
   testScores?: string
 
   // Canadian Connections
-  interestedInImmigrating: string
+  interestedInImmigrating: string[]
   studiedOrWorkedInCanada: 'yes' | 'no'
   jobOfferFromCanadianEmployer: 'yes' | 'no'
   relativesInCanada: 'yes' | 'no'
