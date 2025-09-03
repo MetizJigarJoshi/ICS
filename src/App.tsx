@@ -10,7 +10,7 @@ import { FormData } from './types/form'
 type AppState = 'form' | 'auth' | 'success' | 'dashboard'
 
 function App() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const [appState, setAppState] = useState<AppState>(user ? 'dashboard' : 'form')
   const [pendingFormData, setPendingFormData] = useState<FormData | undefined>()
   const [submissionReferenceId, setSubmissionReferenceId] = useState<string>('')
