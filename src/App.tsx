@@ -1,18 +1,28 @@
 import React, { useState } from 'react'
 import { Layout } from './components/Layout'
 import { EligibilityForm } from './components/EligibilityForm'
+import { Dashboard } from './components/Dashboard'
 import { AuthForm } from './components/AuthForm'
 import { SuccessMessage } from './components/SuccessMessage'
 import { useAuth } from './hooks/useAuth'
 import { FormData } from './types/form'
 
-type AppState = 'form' | 'auth' | 'success'
+type AppState = 'form' | 'auth' | 'success' | 'dashboard'
 
 function App() {
   const { user } = useAuth()
-  const [appState, setAppState] = useState<AppState>('form')
+  const [appState, setAppState] = useState<AppState>(user ? 'dashboard' : 'form')
   const [pendingFormData, setPendingFormData] = useState<FormData | undefined>()
   const [submissionReferenceId, setSubmissionReferenceId] = useState<string>('')
+
+  // Update app state when user auth changes
+  React.useEffect(() => {
+    if (user && appState === 'form') {
+      setAppState('dashboard')
+    } else if (!user && appState === 'dashboard') {
+      setAppState('form')
+    }
+  }, [user, appState])
 
   const handleFormSubmissionSuccess = (referenceId: string) => {
     setSubmissionReferenceId(referenceId)
@@ -31,8 +41,8 @@ function App() {
       setSubmissionReferenceId(referenceId)
       setAppState('success')
     } else {
-      // User just signed in, go back to form
-      setAppState('form')
+      // User just signed in, go to dashboard
+      setAppState('dashboard')
     }
     setPendingFormData(undefined)
   }
@@ -59,12 +69,11 @@ function App() {
             onStartNew={handleStartNew}
           />
         )
-      case 'form':
+      case 'dashboard':
       default:
         return (
-          <EligibilityForm
+          <Dashboard
             onSubmissionSuccess={handleFormSubmissionSuccess}
-            onAuthRequired={handleAuthRequired}
           />
         )
     }
