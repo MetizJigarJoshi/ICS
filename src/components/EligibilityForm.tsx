@@ -1,36 +1,49 @@
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { CheckCircle, AlertCircle, User, GraduationCap, Briefcase, Globe, Users, FileText } from 'lucide-react'
-import { FormData } from '../types/form'
-import { useAuth } from '../hooks/useAuth'
-import { dbOperations } from '../lib/supabase'
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import {
+  CheckCircle,
+  AlertCircle,
+  User,
+  GraduationCap,
+  Briefcase,
+  Globe,
+  Users,
+  FileText,
+} from "lucide-react";
+import { FormData } from "../types/form";
+import { useAuth } from "../hooks/useAuth";
+import { dbOperations } from "../lib/supabase";
+import { sendEligibilityFormWebhook } from "../lib/webhook";
 
 interface EligibilityFormProps {
-  onSubmissionSuccess: (referenceId: string) => void
-  onAuthRequired: (formData: FormData) => void
+  onSubmissionSuccess: (referenceId: string) => void;
+  onAuthRequired: (formData: FormData) => void;
 }
 
-export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: EligibilityFormProps) {
-  const { user, loading: authLoading } = useAuth()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+export function EligibilityForm({
+  onSubmissionSuccess,
+  onAuthRequired,
+}: EligibilityFormProps) {
+  const { user, loading: authLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch
-  } = useForm<FormData>()
+    watch,
+  } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true)
-    setSubmitError(null)
+    setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       if (!user) {
         // User not logged in - trigger auth flow
-        onAuthRequired(data)
-        return
+        onAuthRequired(data);
+        return;
       }
 
       // User is logged in - save submission directly
@@ -44,55 +57,74 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
           ageGroup: data.ageGroup,
           maritalStatus: data.maritalStatus,
           hasChildren: data.hasChildren,
-          childrenAges: data.childrenAges
+          childrenAges: data.childrenAges,
         },
         education_info: {
           highestEducation: data.highestEducation,
-          educationOutsideCanada: data.educationOutsideCanada
+          educationOutsideCanada: data.educationOutsideCanada,
         },
         work_experience: {
           yearsOfExperience: data.yearsOfExperience,
           workInRegulatedProfession: data.workInRegulatedProfession,
-          occupation: data.occupation
+          occupation: data.occupation,
         },
         language_skills: {
           speakEnglishOrFrench: data.speakEnglishOrFrench,
           languageTest: data.languageTest,
-          testScores: data.testScores
+          testScores: data.testScores,
         },
         canadian_connections: {
           interestedInImmigrating: data.interestedInImmigrating,
           studiedOrWorkedInCanada: data.studiedOrWorkedInCanada,
           jobOfferFromCanadianEmployer: data.jobOfferFromCanadianEmployer,
           relativesInCanada: data.relativesInCanada,
-          settlementFunds: data.settlementFunds
+          settlementFunds: data.settlementFunds,
         },
         additional_info: {
           businessOrManagerialExperience: data.businessOrManagerialExperience,
-          additionalInfo: data.additionalInfo
+          additionalInfo: data.additionalInfo,
         },
-        submission_status: 'submitted'
-      })
+        submission_status: "submitted",
+      });
 
       if (referenceId) {
-        onSubmissionSuccess(referenceId)
+        // Send webhook for eligibility form submission
+        try {
+          await sendEligibilityFormWebhook(
+            user.id,
+            user.email || data.email,
+            user.user_metadata?.full_name || data.fullName,
+            data
+          );
+          console.log("Eligibility form webhook sent successfully");
+        } catch (webhookError) {
+          console.error(
+            "Failed to send eligibility form webhook:",
+            webhookError
+          );
+          // Don't fail the form submission if webhook fails
+        }
+
+        onSubmissionSuccess(referenceId);
       } else {
-        setSubmitError('Failed to submit form. Please try again.')
+        setSubmitError("Failed to submit form. Please try again.");
       }
     } catch (error) {
-      console.error('Submission error:', error)
-      setSubmitError('An error occurred while submitting the form. Please try again.')
+      console.error("Submission error:", error);
+      setSubmitError(
+        "An error occurred while submitting the form. Please try again."
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -100,10 +132,13 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6">
-          <h1 className="text-3xl font-bold mb-2">Immigration Eligibility Assessment</h1>
+          <h1 className="text-3xl font-bold mb-2">
+            Immigration Eligibility Assessment
+          </h1>
           <p className="text-red-100">
-            Complete this form to request a personalized evaluation of your immigration options.
-            Assessments are completed by licensed Canadian immigration consultants.
+            Complete this form to request a personalized evaluation of your
+            immigration options. Assessments are completed by licensed Canadian
+            immigration consultants.
           </p>
         </div>
 
@@ -112,7 +147,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
           <section className="space-y-6">
             <div className="flex items-center space-x-2 mb-4">
               <User className="w-6 h-6 text-red-600" />
-              <h2 className="text-xl font-semibold text-gray-800">Personal Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Personal Information
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -120,7 +157,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                 <label className="form-label">Your Name *</label>
                 <input
                   type="text"
-                  {...register('fullName', { required: 'Name is required' })}
+                  {...register("fullName", { required: "Name is required" })}
                   className="form-input"
                   placeholder="Enter your full name"
                 />
@@ -133,15 +170,17 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               </div>
 
               <div>
-                <label className="form-label">What is your email address? *</label>
+                <label className="form-label">
+                  What is your email address? *
+                </label>
                 <input
                   type="email"
-                  {...register('email', { 
-                    required: 'Email is required',
+                  {...register("email", {
+                    required: "Email is required",
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address'
-                    }
+                      message: "Invalid email address",
+                    },
                   })}
                   className="form-input"
                   placeholder="your.email@example.com"
@@ -157,7 +196,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               <div>
                 <label className="form-label">Country of citizenship *</label>
                 <select
-                  {...register('countryOfCitizenship', { required: 'Country of citizenship is required' })}
+                  {...register("countryOfCitizenship", {
+                    required: "Country of citizenship is required",
+                  })}
                   className="form-input"
                 >
                   <option value="">Select country</option>
@@ -187,7 +228,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               <div>
                 <label className="form-label">Country of Residence *</label>
                 <select
-                  {...register('countryOfResidence', { required: 'Country of residence is required' })}
+                  {...register("countryOfResidence", {
+                    required: "Country of residence is required",
+                  })}
                   className="form-input"
                 >
                   <option value="">Select country</option>
@@ -218,12 +261,22 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             <div>
               <label className="form-label">Age Group *</label>
               <div className="space-y-2">
-                {['Under 18', '18-29', '30-35', '36-40', '41-45', '46-55', 'Over 55'].map((age) => (
+                {[
+                  "Under 18",
+                  "18-29",
+                  "30-35",
+                  "36-40",
+                  "41-45",
+                  "46-55",
+                  "Over 55",
+                ].map((age) => (
                   <label key={age} className="flex items-center">
                     <input
                       type="radio"
                       value={age}
-                      {...register('ageGroup', { required: 'Age group is required' })}
+                      {...register("ageGroup", {
+                        required: "Age group is required",
+                      })}
                       className="mr-2 text-red-600 focus:ring-red-500"
                     />
                     <span className="text-sm text-gray-700">{age}</span>
@@ -241,12 +294,21 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             <div>
               <label className="form-label">Marital Status *</label>
               <div className="space-y-2">
-                {['Single', 'Married', 'Common-law', 'Separated', 'Divorced', 'Widowed'].map((status) => (
+                {[
+                  "Single",
+                  "Married",
+                  "Common-law",
+                  "Separated",
+                  "Divorced",
+                  "Widowed",
+                ].map((status) => (
                   <label key={status} className="flex items-center">
                     <input
                       type="radio"
                       value={status}
-                      {...register('maritalStatus', { required: 'Marital status is required' })}
+                      {...register("maritalStatus", {
+                        required: "Marital status is required",
+                      })}
                       className="mr-2 text-red-600 focus:ring-red-500"
                     />
                     <span className="text-sm text-gray-700">{status}</span>
@@ -268,7 +330,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="yes"
-                    {...register('hasChildren', { required: 'Please select an option' })}
+                    {...register("hasChildren", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -277,7 +341,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('hasChildren', { required: 'Please select an option' })}
+                    {...register("hasChildren", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -291,11 +357,13 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               )}
             </div>
 
-            {watch('hasChildren') === 'yes' && (
+            {watch("hasChildren") === "yes" && (
               <div>
-                <label className="form-label">If yes, how many and what ages?</label>
+                <label className="form-label">
+                  If yes, how many and what ages?
+                </label>
                 <textarea
-                  {...register('childrenAges')}
+                  {...register("childrenAges")}
                   className="form-input"
                   rows={3}
                   placeholder="e.g., 2 children - ages 8 and 12"
@@ -312,22 +380,26 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">What is your highest education level? *</label>
+              <label className="form-label">
+                What is your highest education level? *
+              </label>
               <div className="space-y-2">
                 {[
-                  'High School',
-                  'College Diploma',
+                  "High School",
+                  "College Diploma",
                   "Bachelor's Degree",
                   "Master's Degree",
-                  'PhD or higher',
-                  'Trade Certificate',
-                  'No formal education'
+                  "PhD or higher",
+                  "Trade Certificate",
+                  "No formal education",
                 ].map((level) => (
                   <label key={level} className="flex items-center">
                     <input
                       type="radio"
                       value={level}
-                      {...register('highestEducation', { required: 'Education level is required' })}
+                      {...register("highestEducation", {
+                        required: "Education level is required",
+                      })}
                       className="mr-2 text-red-600 focus:ring-red-500"
                     />
                     <span className="text-sm text-gray-700">{level}</span>
@@ -343,13 +415,17 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">Was your education completed outside of Canada? *</label>
+              <label className="form-label">
+                Was your education completed outside of Canada? *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('educationOutsideCanada', { required: 'Please select an option' })}
+                    {...register("educationOutsideCanada", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -358,7 +434,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('educationOutsideCanada', { required: 'Please select an option' })}
+                    {...register("educationOutsideCanada", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -377,24 +455,31 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
           <section className="space-y-6">
             <div className="flex items-center space-x-2 mb-4">
               <Briefcase className="w-6 h-6 text-red-600" />
-              <h2 className="text-xl font-semibold text-gray-800">Work Experience</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Work Experience
+              </h2>
             </div>
 
             <div>
-              <label className="form-label">How many years of full time, skilled work experience do you have? *</label>
+              <label className="form-label">
+                How many years of full time, skilled work experience do you
+                have? *
+              </label>
               <div className="space-y-2">
                 {[
-                  'Less than 1 year',
-                  '1-2 years',
-                  '2-3 years',
-                  '3-5 years',
-                  'Over 5 years'
+                  "Less than 1 year",
+                  "1-2 years",
+                  "2-3 years",
+                  "3-5 years",
+                  "Over 5 years",
                 ].map((years) => (
                   <label key={years} className="flex items-center">
                     <input
                       type="radio"
                       value={years}
-                      {...register('yearsOfExperience', { required: 'Work experience is required' })}
+                      {...register("yearsOfExperience", {
+                        required: "Work experience is required",
+                      })}
                       className="mr-2 text-red-600 focus:ring-red-500"
                     />
                     <span className="text-sm text-gray-700">{years}</span>
@@ -410,13 +495,17 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">Is your work experience in a regulated profession? *</label>
+              <label className="form-label">
+                Is your work experience in a regulated profession? *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('workInRegulatedProfession', { required: 'Please select an option' })}
+                    {...register("workInRegulatedProfession", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -425,7 +514,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('workInRegulatedProfession', { required: 'Please select an option' })}
+                    {...register("workInRegulatedProfession", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -434,7 +525,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="not-sure"
-                    {...register('workInRegulatedProfession', { required: 'Please select an option' })}
+                    {...register("workInRegulatedProfession", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Not Sure</span>
@@ -449,10 +542,14 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">What is your occupation title? *</label>
+              <label className="form-label">
+                What is your occupation title? *
+              </label>
               <input
                 type="text"
-                {...register('occupation', { required: 'Occupation is required' })}
+                {...register("occupation", {
+                  required: "Occupation is required",
+                })}
                 className="form-input"
                 placeholder="e.g., Software Engineer, Teacher, Accountant"
               />
@@ -469,17 +566,23 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
           <section className="space-y-6">
             <div className="flex items-center space-x-2 mb-4">
               <Globe className="w-6 h-6 text-red-600" />
-              <h2 className="text-xl font-semibold text-gray-800">Language Skills</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Language Skills
+              </h2>
             </div>
 
             <div>
-              <label className="form-label">Do you speak English or French? *</label>
+              <label className="form-label">
+                Do you speak English or French? *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('speakEnglishOrFrench', { required: 'Please select an option' })}
+                    {...register("speakEnglishOrFrench", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -488,7 +591,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('speakEnglishOrFrench', { required: 'Please select an option' })}
+                    {...register("speakEnglishOrFrench", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -503,20 +608,22 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">If you have would you take your level?</label>
+              <label className="form-label">
+                If you have would you take your level?
+              </label>
               <div className="space-y-2">
                 {[
-                  'Beginner',
-                  'Intermediate',
-                  'Advanced',
-                  'Fluent',
-                  'Native'
+                  "Beginner",
+                  "Intermediate",
+                  "Advanced",
+                  "Fluent",
+                  "Native",
                 ].map((level) => (
                   <label key={level} className="flex items-center">
                     <input
                       type="radio"
                       value={level}
-                      {...register('languageLevel')}
+                      {...register("languageLevel")}
                       className="mr-2 text-red-600 focus:ring-red-500"
                     />
                     <span className="text-sm text-gray-700">{level}</span>
@@ -526,13 +633,18 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">Have you taken an official language test (IELTS, CELPIP, TEF, etc.)? *</label>
+              <label className="form-label">
+                Have you taken an official language test (IELTS, CELPIP, TEF,
+                etc.)? *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('languageTest', { required: 'Please select an option' })}
+                    {...register("languageTest", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -541,7 +653,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('languageTest', { required: 'Please select an option' })}
+                    {...register("languageTest", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -555,12 +669,16 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               )}
             </div>
 
-            {watch('languageTest') === 'yes' && (
+            {watch("languageTest") === "yes" && (
               <div>
-                <label className="form-label">(Conditional: Show only if "Yes" above)</label>
-                <label className="form-label">Please enter your test scores</label>
+                <label className="form-label">
+                  (Conditional: Show only if "Yes" above)
+                </label>
+                <label className="form-label">
+                  Please enter your test scores
+                </label>
                 <textarea
-                  {...register('testScores')}
+                  {...register("testScores")}
                   className="form-input"
                   rows={3}
                   placeholder="e.g., IELTS: L-8.0, R-7.5, W-7.0, S-8.5 or CELPIP: L-9, R-8, W-7, S-9"
@@ -573,25 +691,31 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
           <section className="space-y-6">
             <div className="flex items-center space-x-2 mb-4">
               <Users className="w-6 h-6 text-red-600" />
-              <h2 className="text-xl font-semibold text-gray-800">Canadian Connections</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Canadian Connections
+              </h2>
             </div>
 
             <div>
-              <label className="form-label">Why are you interested in immigrating to Canada? *</label>
+              <label className="form-label">
+                Why are you interested in immigrating to Canada? *
+              </label>
               <div className="space-y-2">
                 {[
-                  'Permanent Residency (Express Entry or PNP)',
-                  'Work Permit',
-                  'Study Permit',
-                  'Business/Investment Program',
-                  'Refugee/Asylum',
-                  'I\'m not sure'
+                  "Permanent Residency (Express Entry or PNP)",
+                  "Work Permit",
+                  "Study Permit",
+                  "Business/Investment Program",
+                  "Refugee/Asylum",
+                  "I'm not sure",
                 ].map((reason) => (
                   <label key={reason} className="flex items-center">
                     <input
                       type="radio"
                       value={reason}
-                      {...register('interestedInImmigrating', { required: 'Please select an option' })}
+                      {...register("interestedInImmigrating", {
+                        required: "Please select an option",
+                      })}
                       className="mr-2 text-red-600 focus:ring-red-500"
                     />
                     <span className="text-sm text-gray-700">{reason}</span>
@@ -607,13 +731,18 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">Have you or your spouse previously studied or worked in Canada? *</label>
+              <label className="form-label">
+                Have you or your spouse previously studied or worked in Canada?
+                *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('studiedOrWorkedInCanada', { required: 'Please select an option' })}
+                    {...register("studiedOrWorkedInCanada", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -622,7 +751,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('studiedOrWorkedInCanada', { required: 'Please select an option' })}
+                    {...register("studiedOrWorkedInCanada", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -637,13 +768,17 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">Do you currently have a job offer from a Canadian employer? *</label>
+              <label className="form-label">
+                Do you currently have a job offer from a Canadian employer? *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('jobOfferFromCanadianEmployer', { required: 'Please select an option' })}
+                    {...register("jobOfferFromCanadianEmployer", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -652,7 +787,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('jobOfferFromCanadianEmployer', { required: 'Please select an option' })}
+                    {...register("jobOfferFromCanadianEmployer", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -667,13 +804,17 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">Do you have any relatives in Canada? *</label>
+              <label className="form-label">
+                Do you have any relatives in Canada? *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('relativesInCanada', { required: 'Please select an option' })}
+                    {...register("relativesInCanada", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -682,7 +823,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('relativesInCanada', { required: 'Please select an option' })}
+                    {...register("relativesInCanada", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -697,13 +840,17 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">Do you have any settlement funds available? *</label>
+              <label className="form-label">
+                Do you have any settlement funds available? *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('settlementFunds', { required: 'Please select an option' })}
+                    {...register("settlementFunds", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -712,7 +859,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('settlementFunds', { required: 'Please select an option' })}
+                    {...register("settlementFunds", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -730,7 +879,7 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
               <label className="form-label">If Yes) How much?</label>
               <input
                 type="text"
-                {...register('settlementFundsAmount')}
+                {...register("settlementFundsAmount")}
                 className="form-input"
                 placeholder="Enter amount in CAD"
               />
@@ -741,17 +890,24 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
           <section className="space-y-6">
             <div className="flex items-center space-x-2 mb-4">
               <FileText className="w-6 h-6 text-red-600" />
-              <h2 className="text-xl font-semibold text-gray-800">Additional Information</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Additional Information
+              </h2>
             </div>
 
             <div>
-              <label className="form-label">Do you or your spouse have a business or have managerial experience? *</label>
+              <label className="form-label">
+                Do you or your spouse have a business or have managerial
+                experience? *
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="radio"
                     value="yes"
-                    {...register('businessOrManagerialExperience', { required: 'Please select an option' })}
+                    {...register("businessOrManagerialExperience", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">Yes</span>
@@ -760,7 +916,9 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
                   <input
                     type="radio"
                     value="no"
-                    {...register('businessOrManagerialExperience', { required: 'Please select an option' })}
+                    {...register("businessOrManagerialExperience", {
+                      required: "Please select an option",
+                    })}
                     className="mr-2 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-sm text-gray-700">No</span>
@@ -775,9 +933,11 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
             </div>
 
             <div>
-              <label className="form-label">Additional information or special circumstances (optional)</label>
+              <label className="form-label">
+                Additional information or special circumstances (optional)
+              </label>
               <textarea
-                {...register('additionalInfo')}
+                {...register("additionalInfo")}
                 className="form-input"
                 rows={4}
                 placeholder="Please provide any additional information that might be relevant to your immigration assessment..."
@@ -789,8 +949,13 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="mb-4">
               <p className="text-sm text-gray-600">
-                After submitting this form, you will receive an email with the next steps.
-                <strong> The report is prepared manually by a licensed Canadian immigration consultant.</strong>
+                After submitting this form, you will receive an email with the
+                next steps.
+                <strong>
+                  {" "}
+                  The report is prepared manually by a licensed Canadian
+                  immigration consultant.
+                </strong>
               </p>
             </div>
 
@@ -824,5 +989,5 @@ export function EligibilityForm({ onSubmissionSuccess, onAuthRequired }: Eligibi
         </form>
       </div>
     </div>
-  )
+  );
 }

@@ -1,28 +1,28 @@
-import React from 'react'
-import { LogOut, User, FileText } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
+import React from "react";
+import { LogOut, User, FileText } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 interface LayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { user, profile, signOut, loading } = useAuth()
+  const { user, profile, signOut, loading } = useAuth();
 
   const handleSignOut = async () => {
     try {
-      await signOut()
+      await signOut();
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error("Error signing out:", error);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -64,9 +64,7 @@ export function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12">
@@ -76,11 +74,12 @@ export function Layout({ children }: LayoutProps) {
               © 2025 Immigration Eligibility Assessment. All rights reserved.
             </p>
             <p className="text-xs text-gray-400 mt-2">
-              Assessments are completed by licensed Canadian immigration consultants.
+              Assessments are completed by licensed Canadian immigration
+              consultants.
             </p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

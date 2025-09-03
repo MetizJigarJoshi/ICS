@@ -1,50 +1,82 @@
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, User, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
-import { FormData } from '../types/form'
-import { dbOperations } from '../lib/supabase'
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import {
+  Eye,
+  EyeOff,
+  User,
+  Mail,
+  Lock,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
+import { FormData } from "../types/form";
+import { dbOperations } from "../lib/supabase";
+import { sendFormCompletionWebhook } from "../lib/webhook";
 
 interface AuthFormProps {
-  pendingFormData?: FormData
-  onAuthSuccess: (referenceId?: string) => void
+  pendingFormData?: FormData;
+  onAuthSuccess: (referenceId?: string) => void;
 }
 
 interface AuthFormData {
-  email: string
-  password: string
-  fullName?: string
+  email: string;
+  password: string;
+  fullName?: string;
 }
 
 export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  
-  const { signUp, signIn } = useAuth()
-  
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { signUp, signIn } = useAuth();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
-  } = useForm<AuthFormData>()
+    reset,
+  } = useForm<AuthFormData>();
 
   const onSubmit = async (data: AuthFormData) => {
-    setIsSubmitting(true)
-    setError(null)
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       if (isSignUp) {
         if (!data.fullName) {
-          setError('Full name is required for sign up')
-          return
+          setError("Full name is required for sign up");
+          return;
         }
-        await signUp(data.email, data.password, data.fullName)
+
+        console.log("🔐 Attempting to sign up user:", data.email);
+        console.log("📝 Pending form data:", pendingFormData);
+        console.log("📝 Full name:", data.fullName);
+
+        const result = await signUp(
+          data.email,
+          data.password,
+          data.fullName,
+          pendingFormData
+        );
+        console.log("🔐 Signup result:", result);
+
+        // Show success message and redirect to sign in
+        setError(null);
+
+        // Show success message
+        alert(
+          "Account created successfully! Please check your email for verification and then sign in."
+        );
+
+        // Switch to sign in mode
+        setIsSignUp(false);
+        reset();
       } else {
-        const result = await signIn(data.email, data.password)
-        
+        const result = await signIn(data.email, data.password);
+
         // If we have pending form data and user just signed in, save it
         if (pendingFormData && result.user) {
           const referenceId = await dbOperations.createSubmission({
@@ -57,53 +89,98 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
               ageGroup: pendingFormData.ageGroup,
               maritalStatus: pendingFormData.maritalStatus,
               hasChildren: pendingFormData.hasChildren,
-              childrenAges: pendingFormData.childrenAges
+              childrenAges: pendingFormData.childrenAges,
             },
             education_info: {
               highestEducation: pendingFormData.highestEducation,
-              educationOutsideCanada: pendingFormData.educationOutsideCanada
+              educationOutsideCanada: pendingFormData.educationOutsideCanada,
             },
             work_experience: {
               yearsOfExperience: pendingFormData.yearsOfExperience,
-              workInRegulatedProfession: pendingFormData.workInRegulatedProfession,
-              occupation: pendingFormData.occupation
+              workInRegulatedProfession:
+                pendingFormData.workInRegulatedProfession,
+              occupation: pendingFormData.occupation,
             },
             language_skills: {
               speakEnglishOrFrench: pendingFormData.speakEnglishOrFrench,
               languageTest: pendingFormData.languageTest,
-              testScores: pendingFormData.testScores
+              testScores: pendingFormData.testScores,
             },
             canadian_connections: {
               interestedInImmigrating: pendingFormData.interestedInImmigrating,
               studiedOrWorkedInCanada: pendingFormData.studiedOrWorkedInCanada,
-              jobOfferFromCanadianEmployer: pendingFormData.jobOfferFromCanadianEmployer,
+              jobOfferFromCanadianEmployer:
+                pendingFormData.jobOfferFromCanadianEmployer,
               relativesInCanada: pendingFormData.relativesInCanada,
-              settlementFunds: pendingFormData.settlementFunds
+              settlementFunds: pendingFormData.settlementFunds,
             },
             additional_info: {
-              businessOrManagerialExperience: pendingFormData.businessOrManagerialExperience,
-              additionalInfo: pendingFormData.additionalInfo
+              businessOrManagerialExperience:
+                pendingFormData.businessOrManagerialExperience,
+              additionalInfo: pendingFormData.additionalInfo,
             },
-            submission_status: 'submitted'
-          })
-          
-          onAuthSuccess(referenceId || undefined)
+            submission_status: "submitted",
+          });
+
+          // Send webhook for form completion after signin
+          try {
+            await sendFormCompletionWebhook(
+              result.user.id,
+              result.user.email || pendingFormData.email,
+              result.user.user_metadata?.full_name || pendingFormData.fullName,
+              pendingFormData
+            );
+            console.log(
+              "Form completion webhook sent successfully after signin"
+            );
+          } catch (webhookError) {
+            console.error(
+              "Failed to send form completion webhook after signin:",
+              webhookError
+            );
+            // Don't fail the form submission if webhook fails
+          }
+
+          onAuthSuccess(referenceId || undefined);
         } else {
-          onAuthSuccess()
+          onAuthSuccess();
         }
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during authentication')
+      console.error("Authentication error:", err);
+
+      // Provide more specific error messages
+      let errorMessage = "An error occurred during authentication";
+
+      if (err.message) {
+        if (err.message.includes("Invalid login credentials")) {
+          errorMessage = "Invalid email or password";
+        } else if (err.message.includes("User already registered")) {
+          errorMessage =
+            "An account with this email already exists. Please sign in instead.";
+        } else if (err.message.includes("Password should be at least")) {
+          errorMessage = "Password must be at least 6 characters long";
+        } else if (err.message.includes("Invalid email")) {
+          errorMessage = "Please enter a valid email address";
+        } else if (err.message.includes("Database error")) {
+          errorMessage =
+            "Unable to create account. Please try again or contact support.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      setError(errorMessage);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const toggleMode = () => {
-    setIsSignUp(!isSignUp)
-    setError(null)
-    reset()
-  }
+    setIsSignUp(!isSignUp);
+    setError(null);
+    reset();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -114,15 +191,14 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
               <User className="h-6 w-6 text-red-600" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900">
-              {isSignUp ? 'Create Account' : 'Sign In'}
+              {isSignUp ? "Create Account" : "Sign In"}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              {isSignUp 
-                ? 'Create an account to save your assessment' 
-                : pendingFormData 
-                  ? 'Sign in to complete your assessment submission'
-                  : 'Sign in to access your immigration assessments'
-              }
+              {isSignUp
+                ? "Create an account to save your assessment"
+                : pendingFormData
+                ? "Sign in to complete your assessment submission"
+                : "Sign in to access your immigration assessments"}
             </p>
           </div>
 
@@ -131,7 +207,8 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
               <div className="flex items-center">
                 <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
                 <p className="text-sm text-blue-800">
-                  Your assessment form is ready to submit. Please sign in or create an account to continue.
+                  Your assessment form is ready to submit. Please sign in or
+                  create an account to continue.
                 </p>
               </div>
             </div>
@@ -140,17 +217,15 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {isSignUp && (
               <div>
-                <label className="form-label">
-                  Full Name *
-                </label>
+                <label className="form-label">Full Name *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <User className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     type="text"
-                    {...register('fullName', { 
-                      required: isSignUp ? 'Full name is required' : false 
+                    {...register("fullName", {
+                      required: isSignUp ? "Full name is required" : false,
                     })}
                     className="form-input pl-10"
                     placeholder="Enter your full name"
@@ -166,25 +241,23 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
             )}
 
             <div>
-              <label className="form-label">
-                Email Address *
-              </label>
+              <label className="form-label">Email Address *</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="email"
-                  {...register('email', { 
-                    required: 'Email is required',
+                  {...register("email", {
+                    required: "Email is required",
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address'
-                    }
+                      message: "Invalid email address",
+                    },
                   })}
                   className="form-input pl-10"
                   placeholder="Enter your email"
-                  defaultValue={pendingFormData?.email || ''}
+                  defaultValue={pendingFormData?.email || ""}
                 />
               </div>
               {errors.email && (
@@ -196,21 +269,19 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
             </div>
 
             <div>
-              <label className="form-label">
-                Password *
-              </label>
+              <label className="form-label">Password *</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  {...register('password', { 
-                    required: 'Password is required',
+                  type={showPassword ? "text" : "password"}
+                  {...register("password", {
+                    required: "Password is required",
                     minLength: {
                       value: 6,
-                      message: 'Password must be at least 6 characters'
-                    }
+                      message: "Password must be at least 6 characters",
+                    },
                   })}
                   className="form-input pl-10 pr-10"
                   placeholder="Enter your password"
@@ -252,10 +323,12 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  {isSignUp ? 'Creating Account...' : 'Signing In...'}
+                  {isSignUp ? "Creating Account..." : "Signing In..."}
                 </div>
+              ) : isSignUp ? (
+                "Create Account"
               ) : (
-                isSignUp ? 'Create Account' : 'Sign In'
+                "Sign In"
               )}
             </button>
 
@@ -265,15 +338,14 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
                 onClick={toggleMode}
                 className="text-sm text-red-600 hover:text-red-500 font-medium"
               >
-                {isSignUp 
-                  ? 'Already have an account? Sign in' 
-                  : "Don't have an account? Sign up"
-                }
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Sign up"}
               </button>
             </div>
           </form>
         </div>
       </div>
     </div>
-  )
+  );
 }
