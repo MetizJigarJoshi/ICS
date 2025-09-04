@@ -155,9 +155,17 @@ export function EligibilityForm({
                 <input
                   type="text"
                   {...register("fullName", { required: "Name is required" })}
-                  className="form-input"
+                  className={`form-input ${
+                    editingSubmissionId ? "bg-gray-100 cursor-not-allowed" : ""
+                  }`}
                   placeholder="Enter your full name"
+                  readOnly={!!editingSubmissionId}
                 />
+                {editingSubmissionId && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Name cannot be changed when editing
+                  </p>
+                )}
                 {errors.fullName && (
                   <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />
@@ -179,9 +187,17 @@ export function EligibilityForm({
                       message: "Invalid email address",
                     },
                   })}
-                  className="form-input"
+                  className={`form-input ${
+                    editingSubmissionId ? "bg-gray-100 cursor-not-allowed" : ""
+                  }`}
                   placeholder="your.email@example.com"
+                  readOnly={!!editingSubmissionId}
                 />
+                {editingSubmissionId && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Email cannot be changed when editing
+                  </p>
+                )}
                 {errors.email && (
                   <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   Eye,
@@ -71,17 +71,11 @@ export function AuthForm({
         );
         console.log("🔐 Signup result:", result);
 
-        // Show success message and redirect to sign in
+        // Show success message and redirect to dashboard
         setError(null);
 
-        // Show success message
-        alert(
-          "Account created successfully! Please check your email for verification and then sign in."
-        );
-
-        // Switch to sign in mode
-        setIsSignUp(false);
-        reset();
+        // Redirect to dashboard after successful signup
+        onAuthSuccess();
       } else {
         const result = await signIn(data.email, data.password);
 

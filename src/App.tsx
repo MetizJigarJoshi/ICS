@@ -120,13 +120,7 @@ function App() {
         );
       case "dashboard":
         console.log("📊 Rendering Dashboard");
-        return (
-          <Dashboard
-            onSubmissionSuccess={handleFormSubmissionSuccess}
-            pendingFormData={pendingFormData}
-            onClearPendingData={() => setPendingFormData(undefined)}
-          />
-        );
+        return <Dashboard onSubmissionSuccess={handleFormSubmissionSuccess} />;
       default:
         console.log("🔄 Rendering default EligibilityForm");
         return (
