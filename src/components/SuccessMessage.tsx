@@ -171,3 +171,5 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
 }
   )
 }
+  )
+}
