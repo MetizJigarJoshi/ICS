@@ -211,3 +211,4 @@ export function SuccessMessage({ referenceId, onStartNew }: SuccessMessageProps)
       </div>
     </Layout>
   );
+}
