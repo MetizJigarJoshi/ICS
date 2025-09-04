@@ -59,13 +59,15 @@ export const sendWebhook = async (
     console.log("📡 Response headers:", response.headers);
 
     if (!response.ok) {
-      const errorText = await response.text();
       console.error("❌ Webhook failed with status:", response.status);
-      console.error("❌ Error response:", errorText);
+      console.error("❌ Error response:", responseText);
       throw new Error(
-        `Webhook failed with status: ${response.status}: ${errorText}`
+        `Webhook failed with status: ${response.status}: ${responseText}`
       );
     }
+
+    // Read response body once at the beginning
+    const responseText = await response.text();
 
     // Handle different response types
     if (response.status === 204) {
@@ -77,17 +79,15 @@ export const sendWebhook = async (
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       try {
-        const result = await response.json();
+        const result = JSON.parse(responseText);
         console.log("✅ Webhook sent successfully:", result);
       } catch (jsonError) {
         console.warn("⚠️ Response was not valid JSON, but request succeeded");
-        const textResult = await response.text();
-        console.log("✅ Webhook sent successfully (text response):", textResult);
+        console.log("✅ Webhook sent successfully (text response):", responseText);
       }
     } else {
       // Non-JSON response - read as text
-      const textResult = await response.text();
-      console.log("✅ Webhook sent successfully (text response):", textResult);
+      console.log("✅ Webhook sent successfully (text response):", responseText);
     }
 
     return true;
