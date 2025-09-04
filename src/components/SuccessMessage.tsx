@@ -6,6 +6,7 @@ import {
   CreditCard,
   ArrowLeft,
 } from "lucide-react";
+import { Layout } from "./Layout";
 
 interface SuccessMessageProps {
   referenceId: string;
@@ -14,8 +15,8 @@ interface SuccessMessageProps {
 
 export function SuccessMessage({ referenceId, onStartNew }: SuccessMessageProps) {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl w-full space-y-8">
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-8 py-12 px-4 sm:px-6 lg:px-8">
         {/* Success Header */}
         <div className="text-center mb-8 bg-white rounded-lg shadow-lg p-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
@@ -208,7 +209,5 @@ export function SuccessMessage({ referenceId, onStartNew }: SuccessMessageProps)
           </div>
         </div>
       </div>
-      </div>
-    </div>
+    </Layout>
   );
-}
