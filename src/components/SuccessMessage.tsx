@@ -8,26 +8,16 @@ import {
 } from "lucide-react";
 
 interface SuccessMessageProps {
+  referenceId: string;
   onStartNew: () => void;
 }
 
-export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
+export function SuccessMessage({ referenceId, onStartNew }: SuccessMessageProps) {
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="space-y-8">
-        {/* Back Button */}
-        <div className="mb-6">
-          <button
-            onClick={onStartNew}
-            className="flex items-center text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </button>
-        </div>
-
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl w-full space-y-8">
         {/* Success Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 bg-white rounded-lg shadow-lg p-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
@@ -37,11 +27,18 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
           <p className="text-lg text-gray-600">
             Thank you for completing your immigration eligibility assessment
           </p>
+          {referenceId && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600">
+                Reference ID: <span className="font-mono font-semibold text-gray-800">{referenceId}</span>
+              </p>
+            </div>
+          )}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 bg-white rounded-lg shadow-lg p-8">
           {/* What Happens Next */}
-          <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+          <div className="border border-gray-200 rounded-lg p-6">
             <div className="flex items-center mb-6">
               <CheckCircle className="w-6 h-6 text-green-600 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">
@@ -92,7 +89,7 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
           </div>
 
           {/* Order Your Immigration Report */}
-          <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+          <div className="border border-gray-200 rounded-lg p-6 mt-6">
             <div className="text-center mb-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
@@ -173,7 +170,7 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
           </div>
 
           {/* Secure & Trusted */}
-          <div className="text-center bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+          <div className="text-center border border-gray-200 rounded-lg p-6 mt-6">
             <div className="inline-flex items-center justify-center mb-4">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
               <h3 className="text-lg font-semibold text-gray-800">
@@ -198,7 +195,19 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
               </div>
             </div>
           </div>
+
+          {/* Back to Dashboard Button */}
+          <div className="text-center mt-8">
+            <button
+              onClick={onStartNew}
+              className="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors duration-200"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </button>
+          </div>
         </div>
+      </div>
       </div>
     </div>
   );
