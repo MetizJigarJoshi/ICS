@@ -80,18 +80,18 @@ export function Dashboard({
         // Show form immediately with pending data
         setShowForm(true);
       } else {
-        console.log("📝 No pending data, using basic user info");
-        // No pending data, populate with basic user info
+        console.log("📝 No pending data, showing dashboard");
+        // No pending data, populate with basic user info for future use
         setValue("fullName", user.user_metadata?.full_name || "");
         setValue("email", user.email || "");
 
-        // Show form for new assessment
-        setShowForm(true);
+        // Don't show form automatically - show dashboard content instead
+        setShowForm(false);
       }
     } catch (error) {
       console.error("❌ Error loading user data:", error);
-      // Even if there's an error, show the form
-      setShowForm(true);
+      // Even if there's an error, show the dashboard
+      setShowForm(false);
     }
   }, [user, setValue, pendingFormData]);
 
