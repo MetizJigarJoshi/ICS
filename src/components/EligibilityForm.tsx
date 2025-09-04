@@ -13,7 +13,6 @@ import {
 import { FormData } from "../types/form";
 import { useAuth } from "../hooks/useAuth";
 import { sendEligibilityFormWebhook } from "../lib/webhook";
-import { saveSubmission } from "../lib/eligibilitySubmissions";
 
 interface EligibilityFormProps {
   onSubmissionSuccess: (referenceId: string) => void;
@@ -73,20 +72,7 @@ export function EligibilityForm({
         return;
       }
 
-      // User is logged in - save to database first
-      console.log("💾 Saving form data to database...");
-      const savedSubmission = await saveSubmission(
-        user.id,
-        data,
-        editingSubmissionId // If editing, pass the reference ID
-      );
-
-      console.log(
-        "✅ Form data saved to database:",
-        savedSubmission.reference_id
-      );
-
-      // Send webhook
+      // User is logged in - send webhook only (no DB save)
       try {
         await sendEligibilityFormWebhook(
           user.id,
@@ -104,8 +90,8 @@ export function EligibilityForm({
         console.warn("⚠️ Continuing despite webhook failure");
       }
 
-      // Use the database reference ID for success callback
-      onSubmissionSuccess(savedSubmission.reference_id);
+      // Success callback without a reference id (no DB insert)
+      onSubmissionSuccess("");
     } catch (error) {
       console.error("💥 Submission error:", error);
       setSubmitError(

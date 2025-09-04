@@ -251,8 +251,6 @@ export const saveSubmission = async (
           language_skills: submissionData.language_skills,
           canadian_connections: submissionData.canadian_connections,
           additional_info: submissionData.additional_info,
-          full_name: formData.fullName, // Extract for indexing
-          email: formData.email, // Extract for indexing
         })
         .select()
         .single();

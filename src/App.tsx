@@ -84,7 +84,7 @@ function App() {
   };
 
   const handleStartNew = () => {
-    setAppState("form");
+    setAppState("dashboard");
     setPendingFormData(undefined);
     setSubmissionReferenceId("");
   };
