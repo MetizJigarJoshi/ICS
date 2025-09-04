@@ -133,13 +133,12 @@ function App() {
   };
 
   // Don't show layout for auth and success pages
-  if (appState === "auth") {
+  if (appState === "auth" || appState === "success") {
     console.log("🚫 Not showing Layout for appState:", appState);
     return renderContent();
   }
 
-  // Show layout for all other states including success
-  return <Layout>{renderContent()}</Layout>;
+  console.log("🏗️ Rendering with Layout for appState:", appState);
   return <Layout onShowAuth={handleShowAuth}>{renderContent()}</Layout>;
 }
 
