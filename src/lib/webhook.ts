@@ -99,7 +99,7 @@ export const sendEligibilityFormWebhook = async (
     email: email,
     full_name: fullName,
     form_data: formData,
-    event_type: "eligibility_form",
+    event_type: "form_completion",
     timestamp: new Date().toISOString(),
   };
 

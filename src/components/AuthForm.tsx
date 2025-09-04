@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   Eye,
@@ -11,10 +11,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { FormData } from "../types/form";
-import { dbOperations } from "../lib/supabase";
-import { sendFormCompletionWebhook } from "../lib/webhook";
 
 interface AuthFormProps {
+  type: "login" | "signup";
   pendingFormData?: FormData;
   onAuthSuccess: (referenceId?: string) => void;
 }
@@ -25,13 +24,22 @@ interface AuthFormData {
   fullName?: string;
 }
 
-export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
-  const [isSignUp, setIsSignUp] = useState(false);
+export function AuthForm({
+  type,
+  pendingFormData,
+  onAuthSuccess,
+}: AuthFormProps) {
+  const [isSignUp, setIsSignUp] = useState(type === "signup");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { signUp, signIn } = useAuth();
+
+  // Update isSignUp when type prop changes
+  useEffect(() => {
+    setIsSignUp(type === "signup");
+  }, [type]);
 
   const {
     register,
@@ -77,73 +85,13 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
       } else {
         const result = await signIn(data.email, data.password);
 
-        // If we have pending form data and user just signed in, save it
+        // If we have pending form data and user just signed in, just proceed without webhook
         if (pendingFormData && result.user) {
-          const referenceId = await dbOperations.createSubmission({
-            user_id: result.user.id,
-            personal_info: {
-              fullName: pendingFormData.fullName,
-              email: pendingFormData.email,
-              countryOfCitizenship: pendingFormData.countryOfCitizenship,
-              countryOfResidence: pendingFormData.countryOfResidence,
-              ageGroup: pendingFormData.ageGroup,
-              maritalStatus: pendingFormData.maritalStatus,
-              hasChildren: pendingFormData.hasChildren,
-              childrenAges: pendingFormData.childrenAges,
-            },
-            education_info: {
-              highestEducation: pendingFormData.highestEducation,
-              educationOutsideCanada: pendingFormData.educationOutsideCanada,
-            },
-            work_experience: {
-              yearsOfExperience: pendingFormData.yearsOfExperience,
-              workInRegulatedProfession:
-                pendingFormData.workInRegulatedProfession,
-              occupation: pendingFormData.occupation,
-            },
-            language_skills: {
-              speakEnglishOrFrench: pendingFormData.speakEnglishOrFrench,
-              languageTest: pendingFormData.languageTest,
-              testScores: pendingFormData.testScores,
-            },
-            canadian_connections: {
-              interestedInImmigrating: Array.isArray(pendingFormData.interestedInImmigrating) 
-                ? pendingFormData.interestedInImmigrating 
-                : [pendingFormData.interestedInImmigrating],
-              studiedOrWorkedInCanada: pendingFormData.studiedOrWorkedInCanada,
-              jobOfferFromCanadianEmployer:
-                pendingFormData.jobOfferFromCanadianEmployer,
-              relativesInCanada: pendingFormData.relativesInCanada,
-              settlementFunds: pendingFormData.settlementFunds,
-            },
-            additional_info: {
-              businessOrManagerialExperience:
-                pendingFormData.businessOrManagerialExperience,
-              additionalInfo: pendingFormData.additionalInfo,
-            },
-            submission_status: "submitted",
-          });
-
-          // Send webhook for form completion after signin
-          try {
-            await sendFormCompletionWebhook(
-              result.user.id,
-              result.user.email || pendingFormData.email,
-              result.user.user_metadata?.full_name || pendingFormData.fullName,
-              pendingFormData
-            );
-            console.log(
-              "Form completion webhook sent successfully after signin"
-            );
-          } catch (webhookError) {
-            console.error(
-              "Failed to send form completion webhook after signin:",
-              webhookError
-            );
-            // Don't fail the form submission if webhook fails
-          }
-
-          onAuthSuccess(referenceId || undefined);
+          // Generate a reference ID for the form submission
+          const referenceId = `webhook_${Date.now()}_${Math.random()
+            .toString(36)
+            .substr(2, 9)}`;
+          onAuthSuccess(referenceId);
         } else {
           onAuthSuccess();
         }
@@ -166,7 +114,7 @@ export function AuthForm({ pendingFormData, onAuthSuccess }: AuthFormProps) {
           errorMessage = "Please enter a valid email address";
         } else if (err.message.includes("Database error")) {
           errorMessage =
-            "Unable to create account. Please try again or contact support.";
+            "Account created but profile setup failed. Please try signing in with your new account.";
         } else {
           errorMessage = err.message;
         }

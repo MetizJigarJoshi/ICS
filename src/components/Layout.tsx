@@ -1,19 +1,30 @@
 import React from "react";
-import { LogOut, User, FileText } from "lucide-react";
+import { LogOut, User, FileText, LogIn, UserPlus } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 interface LayoutProps {
   children: React.ReactNode;
+  onShowAuth?: (type: "login" | "signup") => void;
 }
 
-export function Layout({ children }: LayoutProps) {
-  const { user, profile, signOut, loading } = useAuth();
+export function Layout({ children, onShowAuth }: LayoutProps) {
+  const { user, signOut, loading } = useAuth();
 
   const handleSignOut = async () => {
     try {
+      console.log("🚪 User signing out...");
       await signOut();
+      console.log(
+        "✅ Sign out successful, user will be redirected to landing page"
+      );
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("❌ Error signing out:", error);
+    }
+  };
+
+  const handleShowAuth = (type: "login" | "signup") => {
+    if (onShowAuth) {
+      onShowAuth(type);
     }
   };
 
@@ -41,14 +52,12 @@ export function Layout({ children }: LayoutProps) {
               </div>
             </div>
 
-            {/* User Menu */}
-            {user && (
+            {/* Auth Buttons / User Menu */}
+            {user ? (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <User className="h-5 w-5 text-gray-400" />
-                  <span className="text-sm text-gray-700">
-                    {profile?.full_name || user.email}
-                  </span>
+                  <span className="text-sm text-gray-700">{user.email}</span>
                 </div>
                 <button
                   onClick={handleSignOut}
@@ -56,6 +65,23 @@ export function Layout({ children }: LayoutProps) {
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Sign Out</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => handleShowAuth("login")}
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span>Login</span>
+                </button>
+                <button
+                  onClick={() => handleShowAuth("signup")}
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>Sign Up</span>
                 </button>
               </div>
             )}

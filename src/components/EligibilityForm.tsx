@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   CheckCircle,
@@ -12,17 +12,19 @@ import {
 } from "lucide-react";
 import { FormData } from "../types/form";
 import { useAuth } from "../hooks/useAuth";
-import { dbOperations } from "../lib/supabase";
 import { sendEligibilityFormWebhook } from "../lib/webhook";
+import { saveSubmission } from "../lib/eligibilitySubmissions";
 
 interface EligibilityFormProps {
   onSubmissionSuccess: (referenceId: string) => void;
   onAuthRequired: (formData: FormData) => void;
+  editingSubmissionId?: string; // Reference ID of submission being edited
 }
 
 export function EligibilityForm({
   onSubmissionSuccess,
   onAuthRequired,
+  editingSubmissionId,
 }: EligibilityFormProps) {
   const { user, loading: authLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,71 +48,41 @@ export function EligibilityForm({
         return;
       }
 
-      // User is logged in - save submission directly
-      const referenceId = await dbOperations.createSubmission({
-        user_id: user.id,
-        personal_info: {
-          fullName: data.fullName,
-          email: data.email,
-          countryOfCitizenship: data.countryOfCitizenship,
-          countryOfResidence: data.countryOfResidence,
-          ageGroup: data.ageGroup,
-          maritalStatus: data.maritalStatus,
-          hasChildren: data.hasChildren,
-          childrenAges: data.childrenAges,
-        },
-        education_info: {
-          highestEducation: data.highestEducation,
-          educationOutsideCanada: data.educationOutsideCanada,
-        },
-        work_experience: {
-          yearsOfExperience: data.yearsOfExperience,
-          workInRegulatedProfession: data.workInRegulatedProfession,
-          occupation: data.occupation,
-        },
-        language_skills: {
-          speakEnglishOrFrench: data.speakEnglishOrFrench,
-          languageTest: data.languageTest,
-          testScores: data.testScores,
-        },
-        canadian_connections: {
-          interestedInImmigrating: data.interestedInImmigrating,
-          studiedOrWorkedInCanada: data.studiedOrWorkedInCanada,
-          jobOfferFromCanadianEmployer: data.jobOfferFromCanadianEmployer,
-          relativesInCanada: data.relativesInCanada,
-          settlementFunds: data.settlementFunds,
-        },
-        additional_info: {
-          businessOrManagerialExperience: data.businessOrManagerialExperience,
-          additionalInfo: data.additionalInfo,
-        },
-        submission_status: "submitted",
-      });
+      // User is logged in - save to database first
+      console.log("💾 Saving form data to database...");
+      const savedSubmission = await saveSubmission(
+        user.id,
+        data,
+        editingSubmissionId // If editing, pass the reference ID
+      );
 
-      if (referenceId) {
-        // Send webhook for eligibility form submission
-        try {
-          await sendEligibilityFormWebhook(
-            user.id,
-            user.email || data.email,
-            user.user_metadata?.full_name || data.fullName,
-            data
-          );
-          console.log("Eligibility form webhook sent successfully");
-        } catch (webhookError) {
-          console.error(
-            "Failed to send eligibility form webhook:",
-            webhookError
-          );
-          // Don't fail the form submission if webhook fails
-        }
+      console.log(
+        "✅ Form data saved to database:",
+        savedSubmission.reference_id
+      );
 
-        onSubmissionSuccess(referenceId);
-      } else {
-        setSubmitError("Failed to submit form. Please try again.");
+      // Send webhook
+      try {
+        await sendEligibilityFormWebhook(
+          user.id,
+          user.email || data.email,
+          user.user_metadata?.full_name || data.fullName,
+          data
+        );
+        console.log("✅ Eligibility form webhook sent successfully");
+      } catch (webhookError) {
+        console.error(
+          "❌ Failed to send eligibility form webhook:",
+          webhookError
+        );
+        // Don't fail the entire submission if webhook fails
+        console.warn("⚠️ Continuing despite webhook failure");
       }
+
+      // Use the database reference ID for success callback
+      onSubmissionSuccess(savedSubmission.reference_id);
     } catch (error) {
-      console.error("Submission error:", error);
+      console.error("💥 Submission error:", error);
       setSubmitError(
         "An error occurred while submitting the form. Please try again."
       );
@@ -195,28 +167,14 @@ export function EligibilityForm({
 
               <div>
                 <label className="form-label">Country of citizenship *</label>
-                <select
+                <input
+                  type="text"
                   {...register("countryOfCitizenship", {
                     required: "Country of citizenship is required",
                   })}
                   className="form-input"
-                >
-                  <option value="">Select country</option>
-                  <option value="United States">United States</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                  <option value="India">India</option>
-                  <option value="China">China</option>
-                  <option value="Philippines">Philippines</option>
-                  <option value="Nigeria">Nigeria</option>
-                  <option value="France">France</option>
-                  <option value="Germany">Germany</option>
-                  <option value="Australia">Australia</option>
-                  <option value="Brazil">Brazil</option>
-                  <option value="Mexico">Mexico</option>
-                  <option value="South Korea">South Korea</option>
-                  <option value="Japan">Japan</option>
-                  <option value="Other">Other</option>
-                </select>
+                  placeholder="Enter your country of citizenship"
+                />
                 {errors.countryOfCitizenship && (
                   <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />
@@ -227,28 +185,14 @@ export function EligibilityForm({
 
               <div>
                 <label className="form-label">Country of Residence *</label>
-                <select
+                <input
+                  type="text"
                   {...register("countryOfResidence", {
                     required: "Country of residence is required",
                   })}
                   className="form-input"
-                >
-                  <option value="">Select country</option>
-                  <option value="United States">United States</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                  <option value="India">India</option>
-                  <option value="China">China</option>
-                  <option value="Philippines">Philippines</option>
-                  <option value="Nigeria">Nigeria</option>
-                  <option value="France">France</option>
-                  <option value="Germany">Germany</option>
-                  <option value="Australia">Australia</option>
-                  <option value="Brazil">Brazil</option>
-                  <option value="Mexico">Mexico</option>
-                  <option value="South Korea">South Korea</option>
-                  <option value="Japan">Japan</option>
-                  <option value="Other">Other</option>
-                </select>
+                  placeholder="Enter your country of residence"
+                />
                 {errors.countryOfResidence && (
                   <p className="form-error">
                     <AlertCircle className="w-4 h-4 mr-1" />
@@ -718,7 +662,9 @@ export function EligibilityForm({
                       })}
                       className="mr-3 mt-0.5 text-red-600 focus:ring-red-500 rounded"
                     />
-                    <span className="text-sm text-gray-700 leading-relaxed">{reason}</span>
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      {reason}
+                    </span>
                   </label>
                 ))}
               </div>
