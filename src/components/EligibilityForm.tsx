@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   CheckCircle,
@@ -19,12 +19,14 @@ interface EligibilityFormProps {
   onSubmissionSuccess: (referenceId: string) => void;
   onAuthRequired: (formData: FormData) => void;
   editingSubmissionId?: string; // Reference ID of submission being edited
+  prePopulatedData?: FormData; // Pre-populated form data for editing
 }
 
 export function EligibilityForm({
   onSubmissionSuccess,
   onAuthRequired,
   editingSubmissionId,
+  prePopulatedData,
 }: EligibilityFormProps) {
   const { user, loading: authLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +37,30 @@ export function EligibilityForm({
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
+    reset,
   } = useForm<FormData>();
+
+  // Populate form with pre-populated data when editing
+  useEffect(() => {
+    if (prePopulatedData) {
+      console.log(
+        "🔄 Populating form with pre-populated data:",
+        prePopulatedData
+      );
+
+      // Reset form first to clear any existing data
+      reset();
+
+      // Set each field value
+      Object.entries(prePopulatedData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          console.log(`📝 Setting form field ${key}:`, value);
+          setValue(key as keyof FormData, value);
+        }
+      });
+    }
+  }, [prePopulatedData, setValue, reset]);
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);

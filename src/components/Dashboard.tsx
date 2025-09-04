@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import {
   CheckCircle,
   Users,
@@ -37,8 +36,6 @@ export function Dashboard({
   const [editingSubmission, setEditingSubmission] =
     useState<EligibilitySubmission | null>(null);
 
-  const { setValue, reset } = useForm<FormData>();
-
   // Load existing submissions for the user
   useEffect(() => {
     if (!user) return;
@@ -72,19 +69,10 @@ export function Dashboard({
       // Priority 1: Use pending form data if available (from Step 1)
       if (pendingFormData) {
         console.log("📝 Using pending form data from Step 1:", pendingFormData);
-        Object.entries(pendingFormData).forEach(([key, value]) => {
-          if (value) {
-            setValue(key as keyof FormData, value);
-          }
-        });
         // Show form immediately with pending data
         setShowForm(true);
       } else {
         console.log("📝 No pending data, showing dashboard");
-        // No pending data, populate with basic user info for future use
-        setValue("fullName", user.user_metadata?.full_name || "");
-        setValue("email", user.email || "");
-
         // Don't show form automatically - show dashboard content instead
         setShowForm(false);
       }
@@ -93,7 +81,7 @@ export function Dashboard({
       // Even if there's an error, show the dashboard
       setShowForm(false);
     }
-  }, [user, setValue, pendingFormData]);
+  }, [user, pendingFormData]);
 
   // Handle successful form submission
   const handleSubmissionSuccess = (referenceId: string) => {
@@ -123,24 +111,12 @@ export function Dashboard({
   };
 
   const handleNewAssessment = () => {
-    reset();
-    setValue("fullName", user?.user_metadata?.full_name || "");
-    setValue("email", user?.email || "");
     setEditingSubmission(null);
     setShowForm(true);
   };
 
   const handleEditSubmission = (submission: EligibilitySubmission) => {
     console.log("✏️ Editing submission:", submission.reference_id);
-    const formData = submissionDataToFormData(submission);
-
-    // Populate form with existing data
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        setValue(key as keyof FormData, value);
-      }
-    });
-
     setEditingSubmission(submission);
     setShowForm(true);
   };
@@ -221,6 +197,11 @@ export function Dashboard({
           onSubmissionSuccess={handleSubmissionSuccess}
           onAuthRequired={() => {}} // Not needed since user is already authenticated
           editingSubmissionId={editingSubmission?.reference_id}
+          prePopulatedData={
+            editingSubmission
+              ? submissionDataToFormData(editingSubmission)
+              : undefined
+          }
         />
       </div>
     );

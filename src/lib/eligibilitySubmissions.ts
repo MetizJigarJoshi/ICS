@@ -5,12 +5,12 @@ export interface EligibilitySubmission {
   id: string;
   user_id: string;
   reference_id: string;
-  personal_info: any;
-  education_info: any;
-  work_experience: any;
-  language_skills: any;
-  canadian_connections: any;
-  additional_info: any;
+  personal_info: any; // Can be object or JSON string
+  education_info: any; // Can be object or JSON string
+  work_experience: any; // Can be object or JSON string
+  language_skills: any; // Can be object or JSON string
+  canadian_connections: any; // Can be object or JSON string
+  additional_info: any; // Can be object or JSON string
   submission_status: string;
   created_at: string;
   updated_at: string;
@@ -59,45 +59,70 @@ export const formDataToSubmissionData = (formData: FormData) => {
   };
 };
 
+// Helper function to safely parse JSON strings
+const safeParseJson = (data: any): any => {
+  if (typeof data === "string") {
+    try {
+      return JSON.parse(data);
+    } catch (error) {
+      console.warn("Failed to parse JSON string:", data);
+      return {};
+    }
+  }
+  return data || {};
+};
+
 // Convert database structure back to FormData
 export const submissionDataToFormData = (
   submission: EligibilitySubmission
 ): FormData => {
+  // Parse JSON strings if they exist
+  const personalInfo = safeParseJson(submission.personal_info);
+  const educationInfo = safeParseJson(submission.education_info);
+  const workExperience = safeParseJson(submission.work_experience);
+  const languageSkills = safeParseJson(submission.language_skills);
+  const canadianConnections = safeParseJson(submission.canadian_connections);
+  const additionalInfo = safeParseJson(submission.additional_info);
+
+  console.log("🔄 Parsed submission data:", {
+    personalInfo,
+    educationInfo,
+    workExperience,
+    languageSkills,
+    canadianConnections,
+    additionalInfo,
+  });
+
   return {
-    fullName: submission.personal_info?.fullName || "",
-    email: submission.personal_info?.email || "",
-    countryOfCitizenship: submission.personal_info?.countryOfCitizenship || "",
-    countryOfResidence: submission.personal_info?.countryOfResidence || "",
-    ageGroup: submission.personal_info?.ageGroup || "",
-    maritalStatus: submission.personal_info?.maritalStatus || "",
-    hasChildren: submission.personal_info?.hasChildren || "no",
-    childrenAges: submission.personal_info?.childrenAges || "",
-    highestEducation: submission.education_info?.highestEducation || "",
-    educationOutsideCanada:
-      submission.education_info?.educationOutsideCanada || "no",
-    yearsOfExperience: submission.work_experience?.yearsOfExperience || "",
+    fullName: personalInfo.fullName || "",
+    email: personalInfo.email || "",
+    countryOfCitizenship: personalInfo.countryOfCitizenship || "",
+    countryOfResidence: personalInfo.countryOfResidence || "",
+    ageGroup: personalInfo.ageGroup || "",
+    maritalStatus: personalInfo.maritalStatus || "",
+    hasChildren: personalInfo.hasChildren || "no",
+    childrenAges: personalInfo.childrenAges || "",
+    highestEducation: educationInfo.highestEducation || "",
+    educationOutsideCanada: educationInfo.educationOutsideCanada || "no",
+    yearsOfExperience: workExperience.yearsOfExperience || "",
     workInRegulatedProfession:
-      submission.work_experience?.workInRegulatedProfession || "not-sure",
-    occupation: submission.work_experience?.occupation || "",
-    speakEnglishOrFrench:
-      submission.language_skills?.speakEnglishOrFrench || "no",
-    languageTest: submission.language_skills?.languageTest || "no",
-    languageLevel: submission.language_skills?.languageLevel || "",
-    testScores: submission.language_skills?.testScores || "",
-    interestedInImmigrating:
-      submission.canadian_connections?.interestedInImmigrating || [],
+      workExperience.workInRegulatedProfession || "not-sure",
+    occupation: workExperience.occupation || "",
+    speakEnglishOrFrench: languageSkills.speakEnglishOrFrench || "no",
+    languageTest: languageSkills.languageTest || "no",
+    languageLevel: languageSkills.languageLevel || "",
+    testScores: languageSkills.testScores || "",
+    interestedInImmigrating: canadianConnections.interestedInImmigrating || [],
     studiedOrWorkedInCanada:
-      submission.canadian_connections?.studiedOrWorkedInCanada || "no",
+      canadianConnections.studiedOrWorkedInCanada || "no",
     jobOfferFromCanadianEmployer:
-      submission.canadian_connections?.jobOfferFromCanadianEmployer || "no",
-    relativesInCanada:
-      submission.canadian_connections?.relativesInCanada || "no",
-    settlementFunds: submission.canadian_connections?.settlementFunds || "no",
-    settlementFundsAmount:
-      submission.canadian_connections?.settlementFundsAmount || "",
+      canadianConnections.jobOfferFromCanadianEmployer || "no",
+    relativesInCanada: canadianConnections.relativesInCanada || "no",
+    settlementFunds: canadianConnections.settlementFunds || "no",
+    settlementFundsAmount: canadianConnections.settlementFundsAmount || "",
     businessOrManagerialExperience:
-      submission.additional_info?.businessOrManagerialExperience || "no",
-    additionalInfo: submission.additional_info?.additionalInfo || "",
+      additionalInfo.businessOrManagerialExperience || "no",
+    additionalInfo: additionalInfo.additionalInfo || "",
   };
 };
 
@@ -120,6 +145,9 @@ export const fetchUserSubmissions = async (
     }
 
     console.log("✅ Fetched submissions:", data?.length || 0);
+    if (data && data.length > 0) {
+      console.log("📊 Raw submission data sample:", data[0]);
+    }
     return data || [];
   } catch (error) {
     console.error("💥 Failed to fetch submissions:", error);
