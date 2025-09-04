@@ -111,15 +111,25 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
 
             {/* Payment Buttons */}
             <div className="space-y-4">
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+              <a 
+                href="https://buy.stripe.com/fZu14ngrhaFvdNh2IT0x200"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+              >
                 <CreditCard className="h-5 w-5 mr-2" />
                 💳 Pay with Stripe ($39 USD)
-              </button>
+              </a>
               
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+              <a 
+                href="https://www.paypal.com/ncp/payment/UQK88YJA6AEBY"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+              >
                 <CreditCard className="h-5 w-5 mr-2" />
                 💳 Pay with PayPal ($39 USD)
-              </button>
+              </a>
             </div>
           </div>
         </div>
