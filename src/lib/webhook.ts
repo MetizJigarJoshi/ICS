@@ -67,8 +67,29 @@ export const sendWebhook = async (
       );
     }
 
-    const result = await response.json();
-    console.log("✅ Webhook sent successfully:", result);
+    // Handle different response types
+    if (response.status === 204) {
+      // No Content - successful but no response body
+      console.log("✅ Webhook sent successfully (No Content)");
+      return true;
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      try {
+        const result = await response.json();
+        console.log("✅ Webhook sent successfully:", result);
+      } catch (jsonError) {
+        console.warn("⚠️ Response was not valid JSON, but request succeeded");
+        const textResult = await response.text();
+        console.log("✅ Webhook sent successfully (text response):", textResult);
+      }
+    } else {
+      // Non-JSON response - read as text
+      const textResult = await response.text();
+      console.log("✅ Webhook sent successfully (text response):", textResult);
+    }
+
     return true;
   } catch (error) {
     console.error("💥 Failed to send webhook:", error);
