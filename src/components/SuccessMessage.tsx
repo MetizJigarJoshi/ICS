@@ -166,10 +166,8 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
           </div>
         </div>
       </div>
+    </div>
   );
-}
-}
-  )
 }
   )
 }
