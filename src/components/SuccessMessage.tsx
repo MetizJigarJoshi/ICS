@@ -1,155 +1,164 @@
 import React from "react";
-import { CheckCircle, FileText, Mail, ArrowRight } from "lucide-react";
+import { CheckCircle, Mail, Clock, FileText, Shield, CreditCard } from "lucide-react";
 
 interface SuccessMessageProps {
-  referenceId: string;
   onStartNew: () => void;
 }
 
-export function SuccessMessage({
-  referenceId,
-  onStartNew,
-}: SuccessMessageProps) {
+export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Success Header */}
-          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-8 text-center">
-            <div className="mx-auto h-16 w-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle className="h-10 w-10 text-white" />
+      <div className="max-w-4xl w-full space-y-8">
+        {/* What Happens Next Section */}
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-8">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <CheckCircle className="h-8 w-8 text-green-600 mr-3" />
+              <h1 className="text-2xl font-bold text-gray-800">What Happens Next</h1>
             </div>
-            <h1 className="text-3xl font-bold mb-2">
-              Assessment Submitted Successfully!
-            </h1>
-            <p className="text-green-100 text-lg">
-              Your immigration eligibility assessment has been received and is
-              being processed.
-            </p>
           </div>
 
-          {/* Content */}
-          <div className="p-8 space-y-6">
-            {/* Reference ID */}
-            <div className="bg-gray-50 rounded-lg p-6 text-center">
-              <div className="flex items-center justify-center mb-3">
-                <FileText className="h-6 w-6 text-gray-600 mr-2" />
-                <h2 className="text-lg font-semibold text-gray-800">
-                  Your Reference ID
-                </h2>
+          <div className="space-y-6">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-6 w-6 text-green-600 mt-1" />
               </div>
-              <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-4">
-                <code className="text-2xl font-mono font-bold text-red-600 tracking-wider">
-                  {referenceId}
-                </code>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                Please save this reference ID for your records. You'll need it
-                to track your assessment.
+              <p className="text-gray-700 text-lg">
+                You'll receive an automatic confirmation by email
               </p>
             </div>
 
-            {/* What Happens Next */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-                <ArrowRight className="h-5 w-5 text-red-600 mr-2" />
-                What Happens Next?
-              </h2>
-
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-semibold text-red-600">
-                      1
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-800">
-                      Review Process
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      A licensed Canadian immigration consultant will review
-                      your information and assess your eligibility for various
-                      immigration programs.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-semibold text-red-600">
-                      2
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-800">
-                      Personalized Report
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      You'll receive a detailed report outlining your
-                      immigration options, eligibility scores, and recommended
-                      next steps.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-semibold text-red-600">
-                      3
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-800">
-                      Follow-up Consultation
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      If eligible, you'll be contacted to discuss your options
-                      and potential next steps in detail.
-                    </p>
-                  </div>
-                </div>
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-6 w-6 text-green-600 mt-1" />
               </div>
+              <p className="text-gray-700 text-lg">
+                Our licensed consultant will review your answers
+              </p>
             </div>
 
-            {/* Email Notification */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <Mail className="h-5 w-5 text-blue-600 mr-2" />
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-6 w-6 text-green-600 mt-1" />
+              </div>
+              <p className="text-gray-700 text-lg">
+                Please proceed to payment below to receive your report
+              </p>
+            </div>
+
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-6 w-6 text-green-600 mt-1" />
+              </div>
+              <p className="text-gray-700 text-lg">
+                Once payment is received, we'll send your eligibility report by email
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center">
+              <Mail className="h-5 w-5 text-blue-600 mr-2" />
+              <p className="text-blue-800 text-sm">
+                You will also receive a confirmation email with payment details for your records.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Order Your Immigration Report Section */}
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-8">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">Order Your Immigration Report</h2>
+            </div>
+          </div>
+
+          <div className="max-w-2xl mx-auto">
+            <div className="mb-8">
+              <div className="flex items-start space-x-4 mb-6">
+                <CheckCircle className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-blue-800">
-                    Email Confirmation
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    Get a Personalized RCIC Review – $39 USD
                   </h3>
-                  <p className="text-blue-700 text-sm">
-                    A confirmation email has been sent to your registered email
-                    address with your reference ID and next steps.
-                  </p>
+                  
+                  <div className="space-y-3 text-gray-600">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                      <span className="text-sm">You'll receive a PDF report within 24–48 hours</span>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <div className="w-6 h-4 mr-2 flex items-center justify-center">
+                        <div className="w-4 h-3 bg-red-500 rounded-sm"></div>
+                        <div className="w-2 h-2 bg-white rounded-full absolute"></div>
+                      </div>
+                      <span className="text-sm">Reviewed by a Licensed Canadian Immigration Consultant (RCIC)</span>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 mr-2 text-yellow-500">💡</div>
+                      <span className="text-sm">Includes specific advice based on your immigration goals</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Timeline */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="font-medium text-yellow-800 mb-2">
-                Expected Timeline
-              </h3>
-              <p className="text-yellow-700 text-sm">
-                <strong>Initial Review:</strong> 2-3 business days
-                <br />
-                <strong>Detailed Report:</strong> 5-7 business days
-                <br />
-                <strong>Consultation Scheduling:</strong> Within 10 business
-                days (if applicable)
-              </p>
-            </div>
-
-            {/* Action Button */}
-            <div className="text-center pt-4">
-              <button onClick={onStartNew} className="btn-primary">
-                Submit
+            {/* Payment Buttons */}
+            <div className="space-y-4">
+              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                <CreditCard className="h-5 w-5 mr-2" />
+                💳 Pay with Stripe ($39 USD)
+              </button>
+              
+              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                <CreditCard className="h-5 w-5 mr-2" />
+                💳 Pay with PayPal ($39 USD)
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Secure & Trusted Section */}
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <CheckCircle className="h-6 w-6 text-green-600 mr-2" />
+              <h3 className="text-lg font-semibold text-gray-800">Secure & Trusted</h3>
+            </div>
+            
+            <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
+              <div className="flex items-center">
+                <Shield className="h-5 w-5 text-yellow-600 mr-2" />
+                <span>🔒 SSL Secure</span>
+              </div>
+              
+              <div className="flex items-center">
+                <CreditCard className="h-5 w-5 text-blue-600 mr-2" />
+                <span>💳 Stripe Payments</span>
+              </div>
+              
+              <div className="flex items-center">
+                <Shield className="h-5 w-5 text-blue-600 mr-2" />
+                <span>🛡️ GDPR-Compliant</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Back to Dashboard Button */}
+        <div className="text-center">
+          <button
+            onClick={onStartNew}
+            className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
+          >
+            Back to Dashboard
+          </button>
         </div>
       </div>
     </div>
