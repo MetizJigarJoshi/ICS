@@ -6,6 +6,7 @@ import {
   Clock,
   RefreshCw,
   Edit,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { EligibilityForm } from "./EligibilityForm";
@@ -13,6 +14,7 @@ import {
   fetchUserSubmissions,
   EligibilitySubmission,
   submissionDataToFormData,
+  deleteSubmission,
 } from "../lib/eligibilitySubmissions";
 
 interface DashboardProps {
@@ -28,6 +30,9 @@ export function Dashboard({ onSubmissionSuccess }: DashboardProps) {
   const [loadingSubmissions, setLoadingSubmissions] = useState(true);
   const [editingSubmission, setEditingSubmission] =
     useState<EligibilitySubmission | null>(null);
+  const [deletingSubmission, setDeletingSubmission] =
+    useState<EligibilitySubmission | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load existing submissions for the user
   useEffect(() => {
@@ -108,6 +113,36 @@ export function Dashboard({ onSubmissionSuccess }: DashboardProps) {
     } finally {
       setLoadingSubmissions(false);
     }
+  };
+
+  const handleDeleteSubmission = (submission: EligibilitySubmission) => {
+    setDeletingSubmission(submission);
+  };
+
+  const confirmDelete = async () => {
+    if (!user || !deletingSubmission) return;
+
+    try {
+      setIsDeleting(true);
+      console.log("🗑️ Deleting submission:", deletingSubmission.reference_id);
+
+      await deleteSubmission(user.id, deletingSubmission.reference_id);
+
+      // Refresh submissions list
+      await handleRefreshSubmissions();
+
+      console.log("✅ Submission deleted successfully");
+    } catch (error) {
+      console.error("❌ Error deleting submission:", error);
+      alert("Failed to delete submission. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setDeletingSubmission(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeletingSubmission(null);
   };
 
   // If showing form, render the eligibility form
@@ -261,6 +296,13 @@ export function Dashboard({ onSubmissionSuccess }: DashboardProps) {
                         >
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSubmission(submission)}
+                          className="flex items-center px-3 py-1 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
                         </button>
                       </div>
                     </div>
@@ -438,6 +480,68 @@ export function Dashboard({ onSubmissionSuccess }: DashboardProps) {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deletingSubmission && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Delete Submission
+                </h3>
+                <p className="text-sm text-gray-600">
+                  This action cannot be undone
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-700">
+                Are you sure you want to delete submission{" "}
+                <span className="font-medium text-gray-900">
+                  {deletingSubmission.reference_id}
+                </span>
+                ?
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                All data associated with this submission will be permanently
+                removed.
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={cancelDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 flex items-center"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

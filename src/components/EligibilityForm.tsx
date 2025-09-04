@@ -865,10 +865,11 @@ export function EligibilityForm({
             <div>
               <label className="form-label">If Yes) How much?</label>
               <input
-                type="text"
+                type="number"
                 {...register("settlementFundsAmount")}
                 className="form-input"
                 placeholder="Enter amount in CAD"
+                min="0"
               />
             </div>
           </section>

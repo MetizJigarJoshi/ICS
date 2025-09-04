@@ -16,6 +16,50 @@ export function useAuth() {
     loading: true,
   });
 
+  // Ensure a user profile exists in public.user_profiles for the given auth user
+  const ensureUserProfile = async (user: User) => {
+    try {
+      const userId = user.id;
+      const email = user.email || "";
+      const fullName = (user.user_metadata as any)?.full_name || "";
+
+      // Check if profile exists
+      const { data: existing, error: fetchError } = await supabase
+        .from("user_profiles")
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.warn("⚠️ Failed to check existing user profile:", fetchError);
+      }
+
+      if (!existing) {
+        // Create profile
+        const { error: insertError } = await supabase
+          .from("user_profiles")
+          .insert({ id: userId, email, full_name: fullName });
+
+        if (insertError) {
+          console.error("❌ Failed to create user profile:", insertError);
+        } else {
+          console.log("✅ Created user profile for:", email);
+        }
+      } else {
+        // Optionally keep email/full_name in sync
+        const { error: updateError } = await supabase
+          .from("user_profiles")
+          .update({ email, full_name: fullName })
+          .eq("id", userId);
+        if (updateError) {
+          console.warn("⚠️ Failed to sync user profile fields:", updateError);
+        }
+      }
+    } catch (profileError) {
+      console.error("💥 ensureUserProfile error:", profileError);
+    }
+  };
+
   // Add timeout to prevent infinite loading
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -93,6 +137,8 @@ export function useAuth() {
 
         if (session?.user) {
           console.log("👤 Auth state change: user found");
+          // Best-effort ensure profile exists
+          ensureUserProfile(session.user);
           setAuthState({
             user: session.user,
             session,
@@ -154,8 +200,10 @@ export function useAuth() {
       console.log("✅ User object:", data.user);
       console.log("✅ Session object:", data.session);
 
-      // If signup is successful and we have a user, send webhook
+      // If signup is successful and we have a user, ensure profile + send webhook
       if (data.user) {
+        // Ensure user profile exists immediately after signup
+        await ensureUserProfile(data.user);
         console.log("👤 User created, sending webhook...");
         try {
           console.log("🔔 About to send signup webhook...");

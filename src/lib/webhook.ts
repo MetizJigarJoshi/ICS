@@ -26,9 +26,16 @@ export const sendWebhook = async (
         "https://n8n.metizsoft.in/webhook/candidate-form",
         {
           method: "OPTIONS",
+          mode: "cors",
+          headers: {
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "Content-Type",
+            Origin: window.location.origin,
+          },
         }
       );
       console.log("🔍 OPTIONS test response:", testResponse.status);
+      console.log("🔍 OPTIONS response headers:", testResponse.headers);
     } catch (testError) {
       console.warn("⚠️ OPTIONS test failed:", testError);
     }
@@ -37,8 +44,12 @@ export const sendWebhook = async (
       "https://n8n.metizsoft.in/webhook/candidate-form",
       {
         method: "POST",
+        mode: "cors", // Explicitly set CORS mode
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
+          "Access-Control-Request-Method": "POST",
+          "Access-Control-Request-Headers": "Content-Type",
         },
         body: JSON.stringify(payload),
       }
@@ -66,6 +77,20 @@ export const sendWebhook = async (
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : "No stack trace",
     });
+
+    // Check if it's a CORS error
+    if (error instanceof TypeError && error.message.includes("CORS")) {
+      console.error(
+        "🚫 CORS Error: The webhook server needs to be configured to allow cross-origin requests"
+      );
+      console.error(
+        "🚫 Please configure your n8n webhook to include these headers:"
+      );
+      console.error("🚫 - Access-Control-Allow-Origin: * (or your domain)");
+      console.error("🚫 - Access-Control-Allow-Methods: POST, OPTIONS");
+      console.error("🚫 - Access-Control-Allow-Headers: Content-Type");
+    }
+
     return false;
   }
 };

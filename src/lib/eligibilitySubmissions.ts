@@ -1,6 +1,13 @@
 import { supabase } from "./supabase";
 import { FormData } from "../types/form";
 
+// Generate a unique reference ID
+const generateReferenceId = (): string => {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substr(2, 5);
+  return `IEA-${timestamp}-${random}`.toUpperCase();
+};
+
 export interface EligibilitySubmission {
   id: string;
   user_id: string;
@@ -230,16 +237,22 @@ export const saveSubmission = async (
       // Create new submission
       console.log("🆕 Creating new submission");
 
+      const referenceId = generateReferenceId();
+      console.log("🆕 Generated reference ID:", referenceId);
+
       const { data, error } = await supabase
         .from("eligibility_submissions")
         .insert({
           user_id: userId,
+          reference_id: referenceId,
           personal_info: submissionData.personal_info,
           education_info: submissionData.education_info,
           work_experience: submissionData.work_experience,
           language_skills: submissionData.language_skills,
           canadian_connections: submissionData.canadian_connections,
           additional_info: submissionData.additional_info,
+          full_name: formData.fullName, // Extract for indexing
+          email: formData.email, // Extract for indexing
         })
         .select()
         .single();
@@ -265,7 +278,27 @@ export const deleteSubmission = async (
 ): Promise<void> => {
   try {
     console.log("🗑️ Deleting submission:", referenceId);
+    console.log("🗑️ User ID:", userId);
+    console.log("🗑️ Reference ID:", referenceId);
 
+    // First, let's check if the submission exists
+    const { data: existingSubmission, error: fetchError } = await supabase
+      .from("eligibility_submissions")
+      .select("id, user_id, reference_id")
+      .eq("reference_id", referenceId)
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError) {
+      console.error("❌ Error fetching submission to delete:", fetchError);
+      throw new Error(
+        `Submission not found or access denied: ${fetchError.message}`
+      );
+    }
+
+    console.log("🗑️ Found submission to delete:", existingSubmission);
+
+    // Now delete the submission
     const { error } = await supabase
       .from("eligibility_submissions")
       .delete()
@@ -274,6 +307,12 @@ export const deleteSubmission = async (
 
     if (error) {
       console.error("❌ Error deleting submission:", error);
+      console.error("❌ Error details:", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
       throw error;
     }
 
