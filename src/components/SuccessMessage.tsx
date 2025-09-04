@@ -8,7 +8,7 @@ interface SuccessMessageProps {
 export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
   return (
     <div className="max-w-4xl mx-auto p-6">
-      {/* Back Button */}
+      <div className="space-y-8">
       <div className="mb-6">
         <button
           onClick={onStartNew}
@@ -34,7 +34,7 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
 
       <div className="space-y-6">
         {/* What Happens Next */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex items-center mb-6">
             <CheckCircle className="w-6 h-6 text-green-600 mr-3" />
             <h2 className="text-xl font-semibold text-gray-900">What Happens Next</h2>
@@ -73,7 +73,7 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
         </div>
 
         {/* Order Your Immigration Report */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="text-center mb-6">
             <div className="flex items-center justify-center mb-4">
               <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
@@ -142,7 +142,7 @@ export function SuccessMessage({ onStartNew }: SuccessMessageProps) {
         </div>
 
         {/* Secure & Trusted */}
-        <div className="text-center">
+        <div className="text-center bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="inline-flex items-center justify-center mb-4">
             <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
             <h3 className="text-lg font-semibold text-gray-800">Secure & Trusted</h3>
